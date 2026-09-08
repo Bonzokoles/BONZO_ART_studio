@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workspace Specification",
+  "version": "3.0.0",
+  "lastUpdated": "2026-08-11",
+  "metadata": {
+    "name": "GENINI_ANTGRAV_WORKSPACE",
+    "type": "unified-workspace",
+    "root": "F:\\GENINI_ANTGRAV\\workspace",
+    "owner": "Bonzo",
+    "description": "Zintegrowana przestrzeń robocza dla szybkich prototypów UI ze Stitch oraz ich produkcyjnej integracji za pomocą Antigravity",
+    "architecture": "modular",
+    "primaryTechStack": ["Astro 5", "Next.js", "React 18", "Tailwind CSS", "TypeScript"]
+  },
+  "repositories": {
+    "root": {
+      "path": ".",
+      "type": "workspace",
+      "remote": "",
+      "branch": "main"
+    }
+  },
+  "documentation": {
+    "root": ".workspace_meta",
+    "primary": [
+      ".workspace_meta/README.md"
+    ],
+    "notes": ".workspace_meta/notes",
+    "architecture": ".workspace_meta/notes/decisions.md",
+    "engineering_rules": ".workspace_meta/notes/rules-books"
+  },
+  "criticalRules": [
+    "ZAWSZE stosuj surowy design system (0px border-radius, akcent #d4a574, brak cieni i gradientów)",
+    "NIGDY nie commituj zawartości folderu .workspace_meta/secrets/",
+    "ZAWSZE weryfikuj makiety od Stitch z inżynieryjnymi standardami Antigravity przed dopuszczeniem do DoD"
+  ]
+}

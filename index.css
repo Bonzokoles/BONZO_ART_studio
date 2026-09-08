@@ -1,0 +1,119 @@
+/* BONZO AI Art DEVZ & Creative AI Studio Design System Tokens */
+:root {
+  --bg-0: #0b0d12;
+  --bg-1: #11131a;
+  --bg-2: #181b22;
+  --bg-3: #1f232b;
+  --bg-input: #0e1017;
+  
+  --border: #1f2937;
+  --border-strong: #2a3140;
+  
+  --text-0: #ffffff;
+  --text-1: #d4d4d8;
+  --text-2: #9ca3af;
+  --text-3: #6b7280;
+  
+  --accent: #d4a574;
+  --accent-hover: #e0b585;
+  --accent-soft: rgba(212, 165, 116, 0.12);
+  
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  
+  --provider-fal: #7c3aed;
+  --provider-replicate: #0066ff;
+  --provider-google: #4285f4;
+  --provider-openai: #10a37f;
+  --provider-local: #6b7280;
+  
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  --radius: 0px;
+  --text-xs: 11px;
+}
+
+* {
+  border-radius: 0px !important;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  background-color: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+code, pre, .font-mono, [data-mono] {
+  font-family: var(--font-mono) !important;
+}
+
+/* Thin sharp scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Animation utilities */
+@keyframes terminalShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-1) 0%,
+    var(--bg-3) 50%,
+    var(--bg-1) 100%
+  );
+  background-size: 200% 100%;
+  animation: terminalShimmer 1.8s infinite ease-in-out;
+}
+
+@keyframes scanLaser {
+  0% {
+    top: 0%;
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.8;
+  }
+}
+
+.scan-laser-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 25%, var(--provider-google) 75%, transparent 100%);
+  box-shadow: 0 0 8px rgba(212, 165, 116, 0.6);
+  animation: scanLaser 2.2s infinite linear;
+  pointer-events: none;
+  z-index: 20;
+}

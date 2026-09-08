@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANTGRAV | Workspace Controller</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      border-radius: 0 !important; /* Force 0px border radius everywhere */
+    }
+
+    :root {
+      --bg-primary: #0b0d12;
+      --bg-secondary: #11131a;
+      --bg-nested: #181b22;
+      --bg-hover: #1f232b;
+      --border-std: #1f2937;
+      --border-strong: #2a3140;
+      --accent-gold: #d4a574;
+      --accent-success: #10b981;
+      --accent-danger: #ef4444;
+      --text-primary: #ffffff;
+      --text-body: #d4d4d8;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --sans: ui-sans-serif, system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg-primary);
+      color: var(--text-body);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+    }
+
+    /* Top Layout - Industrial Header */
+    header {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-std);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-title h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .header-subtitle {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stat-badge .number {
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    .stat-badge.success {
+      border-color: var(--accent-success);
+    }
+
+    .stat-badge.success .number {
+      color: var(--accent-success);
+    }
+
+    /* Main Tab Navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .nav-tab {
+      padding: 10px 18px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-primary);
+      background-color: var(--bg-hover);
+    }
+
+    .nav-tab.active {
+      background-color: var(--bg-primary);
+      border-color: var(--border-std);
+      border-bottom: 2px solid var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    /* Sections */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* General Panel Styling */
+    .panel {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-std);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-std);
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    /* Form Elements */
+    .input-field {
+      width: 100%;
+      padding: 10px 14px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      color: var(--text-primary);
+      font-family: var(--sans);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .select-field {
+      padding: 10px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border-std);
+      background-color: var(--bg-nested);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      border-color: var(--accent-gold);
+      color: var(--text-primary);
+      background-color: var(--bg-hover);
+    }
+
+    .btn-accent {
+      background-color: var(--bg-primary);
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    .btn-accent:hover {
+      background-color: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn-success {
+      border-color: var(--accent-success);
+      color: var(--accent-success);
+    }
+
+    /* File System Connect Bar */
+    .connect-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 18px;
+      background-color: var(--bg-nested);
+      border: 1px dashed var(--border-std);
+      margin-bottom: 24px;
+    }
+
+    .connect-bar.connected {
+      border-style: solid;
+      border-color: var(--accent-success);
+    }
+
+    .connect-status {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .connect-status.active {
+      color: var(--accent-success);
+    }
+
+    /* Lists */
+    .task-list {
+      list-style: none;
+      max-height: 450px;
+      overflow-y: auto;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .task-item:hover {
+      border-color: var(--accent-gold);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-gold);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-text {
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .task-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-std);
+      color: var(--text-secondary);
+    }
+
+    .task-tag.priority-high {
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    .task-tag.priority-medium {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    .task-tag.priority-low {
+      border-color: var(--text-muted);
+      color: var(--text-muted);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .task-btn {
+      padding: 4px 8px;
+      background: transparent;
+      border: 1px solid var(--border-std);
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .task-btn:hover {
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
+      background-color: var(--bg-hover);
+    }
+
+    /* DoD Checklist */
+    .dod-list {
+      list-style: none;
+    }
+
+    .dod-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      margin-bottom: 8px;
+    }
+
+    .dod-item.checked {
+      border-color: var(--accent-success);
+    }
+
+    .dod-item.checked label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .dod-item label {
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      flex: 1;
+    }
+
+    /* Grid Layouts */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Skills Panel Layout */
+    .skills-category-header {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      margin: 16px 0 10px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-std);
+    }
+
+    .skills-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .skill-card {
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      padding: 16px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .skill-card:hover {
+      border-color: var(--accent-gold);
+    }
+
+    .skill-card.activated {
+      border-color: var(--accent-gold);
+      background-color: var(--bg-hover);
+    }
+
+    .skill-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .skill-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Notes Area */
+    .notes-textarea {
+      width: 100%;
+      min-height: 250px;
+      padding: 16px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+    }
+
+    .notes-textarea:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .command-block {
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent-gold);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .command-block:hover {
+      border-color: var(--accent-gold);
+      background-color: var(--bg-hover);
+    }
+
+    /* Modal Layout */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-std);
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-std);
+    }
+
+    .modal-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    /* Toast system */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--accent-gold);
+      padding: 14px 20px;
+      z-index: 3000;
+      transform: translateX(400px);
+      transition: transform 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+    }
+
+    .toast-message {
+      font-size: 12px;
+      color: var(--text-body);
+    }
+
+    /* Sub-tabs inside panels */
+    .sub-tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 16px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-std);
+      padding: 2px;
+    }
+
+    .sub-tab {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .sub-tab.active {
+      background-color: var(--bg-nested);
+      color: var(--accent-gold);
+    }
+
+    .sub-panel {
+      display: none;
+    }
+
+    .sub-panel.active {
+      display: block;
+    }
+
+    /* History styling */
+    .history-item {
+      padding: 14px;
+      background-color: var(--bg-nested);
+      border: 1px solid var(--border-std);
+      border-left: 2px solid var(--accent-gold);
+      margin-bottom: 8px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .history-task-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .history-dates {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .history-resolution {
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 8px 12px;
+      background-color: var(--bg-primary);
+      border-left: 1px solid var(--border-std);
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dashboard Header -->
+  <header>
+    <div class="header-content">
+      <div class="header-title">
+        <h1>ANTGRAV | Workspace Controller</h1>
+        <div class="header-subtitle">[SYS] Dashboard v4.1 - Todo & Workspace Management</div>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span>Active Skills:</span>
+          <span class="number" id="activeSkills">0</span>
+        </div>
+        <div class="stat-badge">
+          <span>Pending Tasks:</span>
+          <span class="number" id="pendingTasks">0</span>
+        </div>
+        <div class="stat-badge success">
+          <span>Completed:</span>
+          <span class="number" id="completedTasks">0</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-section="tasks">Tasks & DoD</button>
+        <button class="nav-tab" data-section="notes">Notes & Ideas</button>
+        <button class="nav-tab" data-section="skills">System Skills</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+    
+    <!-- SECTION 1: TASKS & DoD -->
+    <section id="tasks-section" class="section active">
+      <!-- File System API Connect Bar -->
+      <div class="connect-bar" id="connectBar">
+        <button class="btn btn-accent" id="connectBtn" onclick="connectWorkspace()">[CONNECT] .workspace_meta</button>
+        <span class="connect-status" id="connectStatus">Local Storage mode (Sandbox)</span>
+        <button class="btn" onclick="syncFromFiles()" id="syncBtn" style="display:none;">[SYNC]</button>
+      </div>
+
+      <div class="layout-grid">
+        <!-- Left: Todo Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">[LIST] Todo Backlog</h2>
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);" id="todoCount">0 tasks</span>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <input type="text" class="input-field" id="newTaskInput" placeholder="Add new task...">
+            <select class="select-field" id="newTaskPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+            <button class="btn btn-accent" onclick="addNewTask()">[ADD]</button>
+          </div>
+
+          <ul class="task-list" id="taskList">
+            <!-- Dynamic Todo tasks here -->
+          </ul>
+        </div>
+
+        <!-- Right: Sub-panels (History / DoD) -->
+        <div class="panel">
+          <div class="sub-tabs">
+            <button class="sub-tab active" data-subtab="history" onclick="showSubTab('history')">[ARCHIVE] History</button>
+            <button class="sub-tab" data-subtab="dod" onclick="showSubTab('dod')">[GATE] Definition of Done</button>
+          </div>
+
+          <!-- Sub-panel 1: History -->
+          <div class="sub-panel active" id="history-panel">
+            <div id="historyList">
+              <!-- Completed items go here -->
+            </div>
+          </div>
+
+          <!-- Sub-panel 2: DoD -->
+          <div class="sub-panel" id="dod-panel">
+            <ul class="dod-list" id="dodList">
+              <!-- DoD checklist -->
+            </ul>
+
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-std);">
+              <h3 style="font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 8px;">
+                [CRITICAL] Agent Red Lines
+              </h3>
+              <ul style="font-size: 12px; color: var(--text-secondary); list-style: none; line-height: 1.8;">
+                <li>[RED] Never ignore compilation/linter errors</li>
+                <li>[RED] Never commit API keys or credentials</li>
+                <li>[RED] Never skip type-checking in TypeScript</li>
+                <li>[RED] Always document decisions in notes/decisions.md</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: NOTES & IDEAS -->
+    <section id="notes-section" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">[NOTE] Notes Editor</h2>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);" id="sessionTime">Session: 0 min</span>
+        </div>
+
+        <textarea class="notes-textarea" id="notesEditor" placeholder="Write session notes, snippets, or ideas here..."></textarea>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+          <button class="btn btn-accent" onclick="saveNotes()">[SAVE] LocalStorage</button>
+          <button class="btn btn-accent" onclick="saveNotesToFile()" style="border-color: var(--accent-success); color: var(--accent-success);">[FILE] Save to project-notes.md</button>
+          <button class="btn" onclick="loadNotesFromFile()">[LOAD] File</button>
+          <button class="btn" onclick="exportNotes()">[COPY] Markdown</button>
+          <button class="btn" onclick="clearNotes()">[CLEAR]</button>
+        </div>
+        
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-std);">
+          <h3 style="font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+            [SHORTCUT] Active Skill Commands
+          </h3>
+          <div class="command-block" onclick="copyToClipboard('Use the {skill-name} skill for this task')">
+            Activate Skill: Use the {skill-name} skill for this task
+          </div>
+          <div class="command-block" onclick="copyToClipboard('/{skill-name}')">
+            Workflow trigger: /{skill-name}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SYSTEM SKILLS -->
+    <section id="skills-section" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">[REGISTRY] Verified Skills</h2>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);">Loaded active & backup skills</span>
+        </div>
+
+        <!-- Category 1: Installed Local Skills -->
+        <div class="skills-category-header">[ACTIVE] Installed Local Skills (C:\.gemini\config\skills)</div>
+        <div class="skills-list" id="localSkillsGrid"></div>
+
+        <!-- Category 2: Skills to Go -->
+        <div class="skills-category-header">[ARCHIVED] Skills to Go (F:\GENINI_ANTGRAV\skills_to_go)</div>
+        <div class="skills-list" id="skillsToGoGrid"></div>
+
+        <!-- Category 3: System Core Skills -->
+        <div class="skills-category-header">[SYS] Embedded System Core Skills</div>
+        <div class="skills-list" id="systemSkillsGrid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Complete Task Modal -->
+  <div class="modal" id="completionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">[GATE] Complete Task</h2>
+        <button class="modal-close" onclick="cancelCompletion()">×</button>
+      </div>
+      <div style="padding-bottom: 12px; font-size: 13px; font-weight: 600; color: var(--text-primary);" id="completionTaskPreview">Task name</div>
+      <div style="margin-bottom: 16px;">
+        <label style="font-size: 11px; font-family: var(--mono); color: var(--text-secondary); display: block; margin-bottom: 6px;">[RESOLUTION] Describe what was done:</label>
+        <textarea id="completionNotes" class="notes-textarea" style="min-height: 120px;" placeholder="What was added? Which files were edited? How was it tested?"></textarea>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="btn" onclick="cancelCompletion()">[CANCEL]</button>
+        <button class="btn btn-success" onclick="confirmCompletion()">[COMPLETE & ARCHIVE]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast" id="toast">
+    <div class="toast-title" id="toastTitle">System</div>
+    <div class="toast-message" id="toastMessage">Action recorded.</div>
+  </div>
+
+  <script>
+    // ==================== SKILLS DATABASE ====================
+    const localSkills = [
+      { name: "waapi", desc: "Web Animations API integration and native visual timing engine." },
+      { name: "animejs", desc: "Lightweight and powerful JavaScript animation helper." },
+      { name: "gsap", desc: "GreenSock Animation Platform references, timelines and scroll integration." },
+      { name: "three", desc: "Three.js 3D rendering context, materials, shaders and cameras." },
+      { name: "typegpu", desc: "WebGPU utility toolkit for typed, high-performance shading and rendering." },
+      { name: "lottie", desc: "Lottie structural JSON playback, timing and interactivity." },
+      { name: "tailwind", desc: "Tailwind design system utility, variables and utility class config." },
+      { name: "media-use", desc: "Video, audio and visual assets integration, transcripts and sync." },
+      { name: "contribute-catalog", desc: "Metadata contributing structure and community schema builder." },
+      { name: "install-skills", desc: "Automated skill package deployment, download and sparsecalls." }
+    ];
+
+    const skillsToGo = [
+      { name: "hyperframes", desc: "State-driven declarative visual frame renderer." },
+      { name: "hyperframes-animation", desc: "Advanced motion timeline, presets and sequencing." },
+      { name: "hyperframes-cli", desc: "Validation tool for frame structure and bundle integrity." },
+      { name: "hyperframes-core", desc: "High-throughput execution container for hyperframes engine." },
+      { name: "hyperframes-creative", desc: "Creative templates, preset palettes and UI blocks." },
+      { name: "hyperframes-keyframes", desc: "Custom motion keyframing reference for advanced visuals." },
+      { name: "hyperframes-media", desc: "Audio-visual synchronization, cues and media timelines." },
+      { name: "hyperframes-registry", desc: "Global component registry and block wiring ecosystem." },
+      { name: "remotion-to-hyperframes", desc: "Video code translation pipeline into real-time frames." },
+      { name: "website-to-hyperframes", desc: "HTML scraper and frame extractor tool." }
+    ];
+
+    const systemSkills = [
+      { name: "agent-reach", desc: "Live internet searches, platform OSINT and developer search routing." },
+      { name: "stitchflow", desc: "Rapid UI prototyping, visual HTML generation and mock feedback." },
+      { name: "code-review", desc: "Continuous architectural validation and technical debt auditing." },
+      { name: "debug", desc: "Structural diagnostics, reproduction flow and failstate trace." }
+    ];
+
+    const defaultDoDItems = [
+      "npm run build && npm test execute without errors",
+      "TypeScript compiles successfully under strict mode",
+      "Form and state follow layout rules (0px radius, flat border)",
+      "Decisions fully documented in .workspace_meta/notes/decisions.md",
+      "Git diff contains zero credentials or raw secrets"
+    ];
+
+    // ==================== STATE MANAGEMENT ====================
+    let activatedSkills = new Set(JSON.parse(localStorage.getItem('activatedSkills') || '[]'));
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    let history = JSON.parse(localStorage.getItem('history') || '[]');
+    let dodItems = JSON.parse(localStorage.getItem('dodItems') || JSON.stringify(defaultDoDItems.map(text => ({ text, checked: false }))));
+    let totalMinutes = parseInt(localStorage.getItem('sessionTime') || '0');
+
+    // FS API Connect Handles
+    let rootDirHandle = null;
+    let todoDirHandle = null;
+    let historyDirHandle = null;
+    let fsConnected = false;
+
+    let completingTaskIndex = null;
+
+    // ==================== FILE SYSTEM ACCESS ====================
+    async function connectWorkspace() {
+      if (!('showDirectoryPicker' in window)) {
+        showToast('System Error', 'Your browser does not support File System Access API. Please use Chrome/Edge.');
+        return;
+      }
+
+      try {
+        rootDirHandle = await window.showDirectoryPicker({
+          id: 'workspace-meta',
+          mode: 'readwrite',
+          startIn: 'documents'
+        });
+
+        todoDirHandle = await rootDirHandle.getDirectoryHandle('ToDo', { create: true });
+        historyDirHandle = await rootDirHandle.getDirectoryHandle('History', { create: true });
+
+        fsConnected = true;
+        updateConnectUI();
+        await syncFromFiles();
+
+        showToast('Success', `Connected to: ${rootDirHandle.name}`);
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        console.error('Connect error:', e);
+        showToast('Error', 'Failed to connect to the directory.');
+      }
+    }
+
+    function updateConnectUI() {
+      const bar = document.getElementById('connectBar');
+      const btn = document.getElementById('connectBtn');
+      const status = document.getElementById('connectStatus');
+      const syncBtn = document.getElementById('syncBtn');
+
+      if (fsConnected) {
+        bar.classList.add('connected');
+        btn.textContent = '[CONNECTED]';
+        btn.classList.add('btn-success');
+        status.textContent = `${rootDirHandle.name}/ToDo/ + History/`;
+        status.classList.add('active');
+        syncBtn.style.display = '';
+      } else {
+        bar.classList.remove('connected');
+        btn.textContent = '[CONNECT] .workspace_meta';
+        btn.classList.remove('btn-success');
+        status.textContent = 'Local Storage mode (Sandbox)';
+        status.classList.remove('active');
+        syncBtn.style.display = 'none';
+      }
+    }
+
+    function generateTaskId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    function parseTaskFile(content, filename) {
+      const lines = content.split('\n');
+      const task = {
+        id: filename.replace('.md', ''),
+        text: '',
+        priority: 'medium',
+        created: new Date().toISOString(),
+        filename: filename
+      };
+
+      for (const line of lines) {
+        if (line.startsWith('# ')) task.text = line.substring(2).trim();
+        if (line.startsWith('- **Priorytet:**') || line.startsWith('- **Priority:**')) {
+          task.priority = line.split('**')[2]?.trim() || 'medium';
+        }
+        if (line.startsWith('- **Utworzono:**') || line.startsWith('- **Created:**')) {
+          task.created = line.split('**')[2]?.trim() || task.created;
+        }
+      }
+
+      return task;
+    }
+
+    function parseHistoryFile(content, filename) {
+      const lines = content.split('\n');
+      const item = {
+        id: filename.replace('.md', ''),
+        text: '',
+        priority: 'medium',
+        created: '',
+        completed: '',
+        resolution: '',
+        filename: filename
+      };
+
+      let inResolution = false;
+      const resolutionLines = [];
+
+      for (const line of lines) {
+        if (line.startsWith('# ✅ ') || line.startsWith('# [DONE] ')) {
+          item.text = line.substring(line.indexOf(' ') + 1).trim();
+          continue;
+        }
+        if (line.startsWith('- **Priority:**') || line.startsWith('- **Priorytet:**')) {
+          item.priority = line.split('**')[2]?.trim() || 'medium';
+          continue;
+        }
+        if (line.startsWith('- **Created:**') || line.startsWith('- **Utworzono:**')) {
+          item.created = line.split('**')[2]?.trim() || '';
+          continue;
+        }
+        if (line.startsWith('- **Completed:**') || line.startsWith('- **Ukończono:**')) {
+          item.completed = line.split('**')[2]?.trim() || '';
+          continue;
+        }
+        if (line.startsWith('## Resolution') || line.startsWith('## Rozwiązanie')) {
+          inResolution = true;
+          continue;
+        }
+        if (inResolution && line.trim() !== '') resolutionLines.push(line);
+      }
+
+      item.resolution = resolutionLines.join('\n').trim();
+      return item;
+    }
+
+    function taskToMarkdown(task) {
+      return `# ${task.text}\n\n- **Priority:** ${task.priority}\n- **Created:** ${task.created}\n- **Status:** todo\n`;
+    }
+
+    function historyToMarkdown(item) {
+      return `# [DONE] ${item.text}\n\n- **Priority:** ${item.priority}\n- **Created:** ${item.created}\n- **Completed:** ${item.completed}\n- **Status:** done\n\n## Resolution\n\n${item.resolution}\n`;
+    }
+
+    async function saveTaskToFile(task) {
+      if (!fsConnected || !todoDirHandle) return;
+      try {
+        const fileHandle = await todoDirHandle.getFileHandle(task.id + '.md', { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(taskToMarkdown(task));
+        await writable.close();
+      } catch (e) {
+        console.error('File write error:', e);
+      }
+    }
+
+    async function deleteTaskFile(task) {
+      if (!fsConnected || !todoDirHandle) return;
+      try {
+        await todoDirHandle.removeEntry(task.id + '.md');
+      } catch (e) {
+        console.error('File delete error:', e);
+      }
+    }
+
+    async function saveHistoryToFile(item) {
+      if (!fsConnected || !historyDirHandle) return;
+      try {
+        const fileHandle = await historyDirHandle.getFileHandle(item.id + '.md', { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(historyToMarkdown(item));
+        await writable.close();
+      } catch (e) {
+        console.error('History save error:', e);
+      }
+    }
+
+    async function deleteHistoryFile(item) {
+      if (!fsConnected || !historyDirHandle) return;
+      try {
+        await historyDirHandle.removeEntry(item.id + '.md');
+      } catch (e) {
+        console.error('History delete error:', e);
+      }
+    }
+
+    async function syncFromFiles() {
+      if (!fsConnected) return;
+
+      try {
+        // Read Todo directory
+        const newTasks = [];
+        for await (const [name, handle] of todoDirHandle.entries()) {
+          if (handle.kind === 'file' && name.endsWith('.md')) {
+            const file = await handle.getFile();
+            const content = await file.text();
+            newTasks.push(parseTaskFile(content, name));
+          }
+        }
+        tasks = newTasks;
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+
+        // Read History directory
+        const newHistory = [];
+        for await (const [name, handle] of historyDirHandle.entries()) {
+          if (handle.kind === 'file' && name.endsWith('.md')) {
+            const file = await handle.getFile();
+            const content = await file.text();
+            newHistory.push(parseHistoryFile(content, name));
+          }
+        }
+        newHistory.sort((a, b) => (b.completed || '').localeCompare(a.completed || ''));
+        history = newHistory;
+        localStorage.setItem('history', JSON.stringify(history));
+
+        renderTasks();
+        renderHistory();
+        updateStats();
+        showToast('Synced', `Sync complete: ${tasks.length} pending, ${history.length} archived.`);
+      } catch (e) {
+        console.error('Sync error:', e);
+        showToast('Sync Error', e.message);
+      }
+    }
+
+    // ==================== TABS MANAGEMENT ====================
+    function showSection(sectionName) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      
+      document.getElementById(sectionName + '-section').classList.add('active');
+      document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+    }
+
+    function showSubTab(tabName) {
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+
+      document.querySelector(`[data-subtab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName + '-panel').classList.add('active');
+    }
+
+    // ==================== SKILLS SYSTEM ====================
+    function renderSkillsGrid(skillsList, containerId) {
+      const grid = document.getElementById(containerId);
+      grid.innerHTML = '';
+
+      skillsList.forEach(skill => {
+        const isActivated = activatedSkills.has(skill.name);
+        const card = document.createElement('div');
+        card.className = `skill-card ${isActivated ? 'activated' : ''}`;
+        card.onclick = () => activateSkill(skill.name);
+        card.innerHTML = `
+          <div class="skill-name">[${skill.name.toUpperCase()}]</div>
+          <p class="skill-desc">${skill.desc}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderAllSkills() {
+      renderSkillsGrid(localSkills, 'localSkillsGrid');
+      renderSkillsGrid(skillsToGo, 'skillsToGoGrid');
+      renderSkillsGrid(systemSkills, 'systemSkillsGrid');
+    }
+
+    function activateSkill(skillName) {
+      if (activatedSkills.has(skillName)) {
+        activatedSkills.delete(skillName);
+        showToast('Deactivated', `Skill: ${skillName}`);
+      } else {
+        activatedSkills.add(skillName);
+        const command = `Use the ${skillName} skill for this task`;
+        navigator.clipboard.writeText(command).then(() => {
+          showToast('Activated & Copied', `"${skillName}" context copied to clipboard.`);
+        });
+      }
+      localStorage.setItem('activatedSkills', JSON.stringify([...activatedSkills]));
+      renderAllSkills();
+      updateStats();
+    }
+
+    // ==================== TASKS SYSTEM ====================
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+
+      document.getElementById('todoCount').textContent = tasks.length + ' tasks';
+
+      if (tasks.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding: 32px 0; color: var(--text-muted); font-size:12px;">No pending tasks. System 100% clean.</div>`;
+        updateStats();
+        return;
+      }
+
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        li.innerHTML = `
+          <input type="checkbox" class="task-checkbox" onchange="startCompletion(${index})">
+          <div class="task-content">
+            <div class="task-text">${escapeHtml(task.text)}</div>
+            <div class="task-meta">
+              <span class="task-tag priority-${task.priority}">${task.priority}</span>
+              <span style="font-family: var(--mono); font-size: 10px; color: var(--text-muted);">${new Date(task.created).toLocaleDateString('pl-PL')}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="task-btn" onclick="deleteTask(${index})">Delete</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+
+      updateStats();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function addNewTask() {
+      const input = document.getElementById('newTaskInput');
+      const priority = document.getElementById('newTaskPriority');
+      const text = input.value.trim();
+
+      if (!text) {
+        showToast('Error', 'Specify task content.');
+        return;
+      }
+
+      const task = {
+        id: generateTaskId(),
+        text: text,
+        priority: priority.value,
+        created: new Date().toISOString()
+      };
+
+      tasks.unshift(task);
+      saveTasks();
+      renderTasks();
+      input.value = '';
+
+      await saveTaskToFile(task);
+      showToast('Task Saved', 'Task inserted into Todo Backlog.');
+    }
+
+    function startCompletion(index) {
+      completingTaskIndex = index;
+      const task = tasks[index];
+
+      document.getElementById('completionTaskPreview').textContent = task.text;
+      document.getElementById('completionNotes').value = '';
+      document.getElementById('completionModal').classList.add('show');
+
+      setTimeout(() => document.getElementById('completionNotes').focus(), 100);
+    }
+
+    function cancelCompletion() {
+      completingTaskIndex = null;
+      document.getElementById('completionModal').classList.remove('show');
+
+      const checkboxes = document.querySelectorAll('.task-checkbox');
+      checkboxes.forEach(cb => cb.checked = false);
+    }
+
+    async function confirmCompletion() {
+      if (completingTaskIndex === null) return;
+
+      const task = tasks[completingTaskIndex];
+      const resolution = document.getElementById('completionNotes').value.trim();
+
+      if (!resolution) {
+        showToast('Error', 'Please describe the resolution details.');
+        document.getElementById('completionNotes').focus();
+        return;
+      }
+
+      const historyItem = {
+        id: task.id,
+        text: task.text,
+        priority: task.priority,
+        created: task.created,
+        completed: new Date().toISOString(),
+        resolution: resolution
+      };
+
+      history.unshift(historyItem);
+      localStorage.setItem('history', JSON.stringify(history));
+
+      tasks.splice(completingTaskIndex, 1);
+      saveTasks();
+
+      await deleteTaskFile(task);
+      await saveHistoryToFile(historyItem);
+
+      completingTaskIndex = null;
+      document.getElementById('completionModal').classList.remove('show');
+
+      renderTasks();
+      renderHistory();
+      updateStats();
+
+      showToast('Archived', 'Task resolved and moved to completed history.');
+    }
+
+    async function deleteTask(index) {
+      const task = tasks[index];
+      if (!confirm(`Delete task: "${task.text}"?`)) return;
+
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+
+      await deleteTaskFile(task);
+      showToast('Deleted', 'Task permanently removed.');
+    }
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // ==================== HISTORY SYSTEM ====================
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+
+      if (history.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 32px 0; color: var(--text-muted); font-size:12px;">Archive empty.</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      history.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <div class="history-header">
+            <div class="history-task-text">[DONE] ${escapeHtml(item.text)}</div>
+            <div class="history-dates">
+              <div>Created: ${item.created ? new Date(item.created).toLocaleDateString('pl-PL') : '?'}</div>
+              <div>Resolved: ${item.completed ? new Date(item.completed).toLocaleDateString('pl-PL') : '?'}</div>
+            </div>
+          </div>
+          <div class="history-meta">
+            <span class="task-tag priority-${item.priority}">${item.priority}</span>
+          </div>
+          <div class="history-resolution">${escapeHtml(item.resolution || '(No details provided)')}</div>
+          <div style="display:flex; justify-content: flex-end; margin-top:8px;">
+            <button class="task-btn" onclick="deleteHistoryItem(${index})">Purge</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function deleteHistoryItem(index) {
+      const item = history[index];
+      if (!confirm(`Permanently delete history log: "${item.text}"?`)) return;
+
+      history.splice(index, 1);
+      localStorage.setItem('history', JSON.stringify(history));
+      renderHistory();
+      updateStats();
+
+      await deleteHistoryFile(item);
+      showToast('Purged', 'History item permanently purged.');
+    }
+
+    // ==================== DoD CHECKLIST ====================
+    function renderDoD() {
+      const list = document.getElementById('dodList');
+      list.innerHTML = '';
+
+      dodItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = `dod-item ${item.checked ? 'checked' : ''}`;
+        li.innerHTML = `
+          <input type="checkbox" class="task-checkbox" ${item.checked ? 'checked' : ''} onchange="toggleDoD(${index})">
+          <label>${item.text}</label>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleDoD(index) {
+      dodItems[index].checked = !dodItems[index].checked;
+      localStorage.setItem('dodItems', JSON.stringify(dodItems));
+      renderDoD();
+      if (dodItems[index].checked) {
+        showToast('DoD Checked', dodItems[index].text);
+      }
+    }
+
+    // ==================== NOTES ENGINE ====================
+    let notesFileHandle = null;
+
+    function saveNotes() {
+      const notes = document.getElementById('notesEditor').value;
+      localStorage.setItem('projectNotes', notes);
+      showToast('Notes Saved', 'State written to LocalStorage.');
+    }
+
+    async function saveNotesToFile() {
+      const notes = document.getElementById('notesEditor').value;
+      const header = `<!-- Auto-saved: ${new Date().toLocaleString('pl-PL')} -->\n`;
+      const content = header + notes;
+
+      localStorage.setItem('projectNotes', notes);
+
+      if ('showSaveFilePicker' in window) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'project-notes.md',
+            startIn: 'documents',
+            types: [{
+              description: 'Markdown File',
+              accept: { 'text/markdown': ['.md'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(content);
+          await writable.close();
+          notesFileHandle = handle;
+          showToast('File Saved', `Notes written to: ${handle.name}`);
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+
+      // Download fallback
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `project-notes.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded', 'Fell back to standard browser download.');
+    }
+
+    async function loadNotesFromFile() {
+      if ('showOpenFilePicker' in window) {
+        try {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{
+              description: 'Markdown File',
+              accept: { 'text/markdown': ['.md'], 'text/plain': ['.txt'] }
+            }]
+          });
+          const file = await handle.getFile();
+          let text = await file.text();
+          text = text.replace(/^<!-- Auto-saved:.*-->\n/, '');
+          document.getElementById('notesEditor').value = text;
+          localStorage.setItem('projectNotes', text);
+          notesFileHandle = handle;
+          showToast('Loaded File', `Read success: ${file.name}`);
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+    }
+
+    function exportNotes() {
+      const notes = document.getElementById('notesEditor').value;
+      const date = new Date().toISOString().slice(0, 10);
+      const markdown = `# Project Session Notes\n\nDate: ${date}\n\n${notes || '- (No session notes compiled)'}`;
+      
+      navigator.clipboard.writeText(markdown).then(() => {
+        showToast('Copied', 'Markdown document copied to clipboard.');
+      });
+    }
+
+    function clearNotes() {
+      if (confirm('Clear notes workspace?')) {
+        document.getElementById('notesEditor').value = '';
+        localStorage.removeItem('projectNotes');
+        notesFileHandle = null;
+        showToast('Cleared', 'Session notes workspace flushed.');
+      }
+    }
+
+    function loadNotes() {
+      const notes = localStorage.getItem('projectNotes');
+      if (notes !== null) {
+        document.getElementById('notesEditor').value = notes;
+      }
+    }
+
+    // ==================== SYSTEM UTILITIES ====================
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied', text.length > 40 ? text.substring(0, 40) + '...' : text);
+      });
+    }
+
+    function showToast(title, message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').textContent = `[${title.toUpperCase()}]`;
+      document.getElementById('toastMessage').textContent = message;
+      
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function updateStats() {
+      document.getElementById('activeSkills').textContent = activatedSkills.size;
+      document.getElementById('pendingTasks').textContent = tasks.length;
+      document.getElementById('completedTasks').textContent = history.length;
+    }
+
+    function updateSessionTime() {
+      totalMinutes++;
+      localStorage.setItem('sessionTime', totalMinutes);
+      document.getElementById('sessionTime').textContent = 'Session: ' + totalMinutes + ' min';
+    }
+
+    // ==================== ATTACH EVENTS ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAllSkills();
+      renderTasks();
+      renderHistory();
+      renderDoD();
+      loadNotes();
+      updateStats();
+
+      setInterval(updateSessionTime, 60000);
+      document.getElementById('sessionTime').textContent = 'Session: ' + totalMinutes + ' min';
+
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => showSection(tab.dataset.section));
+      });
+
+      document.getElementById('newTaskInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addNewTask();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          cancelCompletion();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

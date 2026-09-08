@@ -1,0 +1,8 @@
+{
+  "name": "Creative AI Studio",
+  "description": "BONZO AI Art DEVZ & Creative AI Studio v2.6: High-density multi-provider generative art workbench supporting Google, fal.ai, Replicate, and OpenAI with real-time footer debug console telemetry, Recharts API latency and success rate visualizer, dedicated feature windows for Wildcards library, Video Configuration, and LiteGraph Workflows pipeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
