@@ -10,9 +10,9 @@ import { VideoContinuationTab } from './features/VideoContinuation/VideoContinua
 import { PromptLibraryTab } from './features/PromptLibrary/PromptLibraryTab';
 import { TimelineStudioTab } from './features/TimelineStudio/TimelineStudioTab';
 import {
-  ARTIST_REGISTRY,
   getArtistPromptAddition,
 } from './data/artistsData';
+import { findArtistById } from './data/allArtists';
 import { debugLogger, type LogEntry } from './services/debugLogger';
 import type { FeatureTab, VeoOperationContext } from './types';
 import { Activity, Sparkles, Terminal, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
@@ -47,7 +47,7 @@ const App: React.FC = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'WILDCARD_ADD_ARTIST') {
         const artistId = event.data.artistId;
-        const artist = ARTIST_REGISTRY.find((a) => a.id === artistId);
+        const artist = findArtistById(artistId);
         if (artist) {
           const addition = getArtistPromptAddition(artist);
           window.dispatchEvent(
@@ -76,7 +76,7 @@ const App: React.FC = () => {
       bc.onmessage = (event) => {
         if (event.data?.type === 'WILDCARD_ADD_ARTIST') {
           const artistId = event.data.artistId;
-          const artist = ARTIST_REGISTRY.find((a) => a.id === artistId);
+          const artist = findArtistById(artistId);
           if (artist) {
             const addition = getArtistPromptAddition(artist);
             window.dispatchEvent(

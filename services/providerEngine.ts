@@ -293,6 +293,61 @@ export const MODELS: ModelInfo[] = [
     supportsNegativePrompt: true,
     supportsSeed: true,
   },
+  {
+    id: 'lucataco/dreamshaper-xl-turbo',
+    label: 'DreamShaper XL Turbo',
+    provider: 'replicate',
+    category: 'image',
+    costPerImage: 0.005,
+    maxOutputs: 4,
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+    replicateVersion: '0a1710e0187b01a255302738ca0158ff02a22f4638679533e111082f9dd1b615',
+  },
+  {
+    id: 'ai-forever/kandinsky-2.2',
+    label: 'Kandinsky 2.2',
+    provider: 'replicate',
+    category: 'image',
+    costPerImage: 0.01,
+    maxOutputs: 4,
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+    replicateVersion: 'ad9d7879fbffa2874e1d909d1d37d9bc682889cc65b31f7bb00d2362619f194a',
+  },
+  {
+    id: 'nvidia/sana',
+    label: 'NVIDIA Sana',
+    provider: 'replicate',
+    category: 'image',
+    costPerImage: 0.005,
+    maxOutputs: 4,
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+    replicateVersion: 'c6b5d2b7459910fec94432e9e1203c3cdce92d6db20f714f1355747990b52fa6',
+  },
+  {
+    id: 'bytedance/sdxl-lightning-4step',
+    label: 'SDXL Lightning 4-Step',
+    provider: 'replicate',
+    category: 'image',
+    costPerImage: 0.003,
+    maxOutputs: 4,
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+    replicateVersion: '6f7a773af6fc3e8de9d5a3c00be77c17308914bf67772726aff83496ba1e3bbe',
+  },
+  {
+    id: 'luma/photon-flash',
+    label: 'Luma Photon Flash',
+    provider: 'replicate',
+    category: 'image',
+    costPerImage: 0.01,
+    maxOutputs: 4,
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+    replicateVersion: '8cee7d47f81d8f4f77c1aec44ffb3d1ce09d36388db637ceaa8a6cbcf30b63e1',
+  },
 
   // OpenAI
   {
@@ -612,9 +667,16 @@ export const executeMultiProviderGeneration = async (
     if (key) {
       const callStart = Date.now();
       const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-      const endpoint = isLocalhost 
-        ? `/api-replicate/v1/models/${model}/predictions` 
-        : `https://api.replicate.com/v1/models/${model}/predictions`;
+      const replicateVersion = modelDef.replicateVersion;
+      // Community models need POST /v1/predictions with a pinned version.
+      // Official models (no replicateVersion) use POST /v1/models/{slug}/predictions.
+      const endpoint = isLocalhost
+        ? (replicateVersion
+            ? `/api-replicate/v1/predictions`
+            : `/api-replicate/v1/models/${model}/predictions`)
+        : (replicateVersion
+            ? `https://api.replicate.com/v1/predictions`
+            : `https://api.replicate.com/v1/models/${model}/predictions`);
       const inputPayload = {
         prompt,
         width,
@@ -628,13 +690,17 @@ export const executeMultiProviderGeneration = async (
         emitProgress(25, 'REPLICATE_QUEUED', `Submitting prediction to Replicate [${model}]...`);
         debugLogger.logRequest('replicate', endpoint, 'POST', { input: inputPayload }, `[REPLICATE] Queuing prediction for ${model}`);
 
+        const createBody = replicateVersion
+          ? { version: replicateVersion, input: inputPayload }
+          : { input: inputPayload };
+
         const createRes = await fetch(endpoint, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${key}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ input: inputPayload }),
+          body: JSON.stringify(createBody),
           signal: options?.signal,
         });
 

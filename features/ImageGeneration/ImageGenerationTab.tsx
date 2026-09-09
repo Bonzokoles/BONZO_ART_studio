@@ -29,11 +29,11 @@ import { RightStudioPanel } from '../../components/RightStudioPanel';
 import { SaveStyleModal } from '../../components/SaveStyleModal';
 import { ImageLightbox, LightboxMetadata } from '../../components/ImageLightbox';
 import {
-  ARTIST_REGISTRY,
   getArtistPromptAddition,
   type SavedStylePreset,
   type Artist,
 } from '../../data/artistsData';
+import { findArtistById } from '../../data/allArtists';
 import {
   Wand2,
   Sparkles,
@@ -152,7 +152,7 @@ export const ImageGenerationTab: React.FC = () => {
     const handleWindowMessage = (event: MessageEvent) => {
       if (event.data?.type === 'WILDCARD_ADD_ARTIST') {
         const artistId = event.data.artistId;
-        const artist = ARTIST_REGISTRY.find((a) => a.id === artistId);
+        const artist = findArtistById(artistId);
         if (artist) {
           const addition = getArtistPromptAddition(artist);
           handleAppendPrompt(addition);
@@ -432,6 +432,7 @@ export const ImageGenerationTab: React.FC = () => {
   };
 
   const filteredModels = MODELS.filter((m) => m.provider === provider);
+  const filteredPresets = PRESETS.filter((p) => p.provider === provider);
   const selectedModelDef = MODELS.find((m) => m.id === model) || filteredModels[0] || MODELS[0];
   const dims = ASPECT_RATIO_DIMENSIONS[aspectRatio];
   const activeImage = generatedImages[activeImageIndex] || null;
@@ -467,7 +468,7 @@ export const ImageGenerationTab: React.FC = () => {
                 onChange={(e) => handleSelectPreset(e.target.value)}
                 className="w-full bg-[#0b0d12] border border-[#1f2937] px-2 py-1.5 text-[#ffffff] focus:border-[#d4a574] focus:outline-none text-[11px]"
               >
-                {PRESETS.map((p) => (
+                {filteredPresets.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.label} - {PROVIDER_LABELS[p.provider]}
                   </option>

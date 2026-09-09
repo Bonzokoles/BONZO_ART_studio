@@ -1,0 +1,362 @@
+import type { ProviderId } from '../types';
+
+// Descriptive model catalog — a small human-readable library for every model
+// and add-on the studio can route generation through. Extends the terse
+// `MODELS` list in providerEngine.ts with use-case guidance, strengths, and
+// integration notes. Single source of truth for UI tooltips and docs.
+
+export interface ModelCatalogEntry {
+  /** Provider-scoped model id, matches MODELS[].id exactly. */
+  id: string;
+  label: string;
+  provider: ProviderId;
+  category: 'image' | 'video' | 'edit';
+  /** Short plain-language description. */
+  description: string;
+  /** What this model is best at, 1-3 short phrases. */
+  bestFor: string[];
+  /** Known limitations / gotchas. */
+  notes?: string;
+  /** Approximate cost hint (per image, USD). */
+  costHint?: string;
+  /** True if the model supports a negative prompt. */
+  supportsNegativePrompt?: boolean;
+  /** True if the model supports seed locking for reproducible output. */
+  supportsSeed?: boolean;
+}
+
+export const MODEL_CATALOG: ModelCatalogEntry[] = [
+  // ── Google ──────────────────────────────────────────────────────────────
+  {
+    id: 'gemini-2.5-flash-image',
+    label: 'Nano Banana (Flash)',
+    provider: 'google',
+    category: 'image',
+    description: 'Fast multimodal image generator. Conversational editing and style transfer via natural language.',
+    bestFor: ['Rapid iteration', 'Conversational image editing', 'Zero-cost prototyping'],
+    notes: 'Output is PNG. Free tier up to 500 requests/day.',
+    costHint: 'free tier',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'gemini-3.1-flash-image',
+    label: 'Nano Banana 2',
+    provider: 'google',
+    category: 'image',
+    description: 'Current-generation Flash image model. Efficient image creation and conversational editing with strong prompt adherence.',
+    bestFor: ['Fast generation', 'Reference-driven editing', 'Photorealistic output'],
+    costHint: '~$0.02/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'gemini-3-pro-image',
+    label: 'Nano Banana Pro',
+    provider: 'google',
+    category: 'image',
+    description: 'High-fidelity image model. Complex professional assets, stronger reference handling, output up to 4K.',
+    bestFor: ['Production-quality assets', 'Complex compositions', '4K output'],
+    costHint: '~$0.04/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'gemini-3.1-flash-lite-image',
+    label: 'Nano Banana 2 Lite',
+    provider: 'google',
+    category: 'image',
+    description: 'Budget variant of Nano Banana 2. Lowest cost, still capable for simple generations.',
+    bestFor: ['Cost-optimized batches', 'Simple generations'],
+    costHint: '~$0.01/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'veo-3.1-generate-preview',
+    label: 'Veo 3.1',
+    provider: 'google',
+    category: 'video',
+    description: 'Google DeepMind video generation. Standard quality tier with image-to-video and text-to-video.',
+    bestFor: ['Cinematic clips', 'Image-to-video continuation'],
+    notes: 'Long-running async operation. Poll for completion.',
+    costHint: 'per second',
+  },
+
+  // ── fal.ai ──────────────────────────────────────────────────────────────
+  {
+    id: 'fal-ai/flux/schnell',
+    label: 'FLUX.1 Schnell',
+    provider: 'fal',
+    category: 'image',
+    description: 'Ultra-fast 4-step FLUX generation by Black Forest Labs. Latency-first.',
+    bestFor: ['Interactive UX', 'Mass generation', 'Lowest latency'],
+    costHint: '$0.003/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/flux-pro/v1.1',
+    label: 'FLUX.1.1 Pro',
+    provider: 'fal',
+    category: 'image',
+    description: 'SOTA photorealism, typography and prompt fidelity.',
+    bestFor: ['Photorealism', 'Typography', 'High prompt fidelity'],
+    costHint: '$0.05/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/flux-pro/v1.1-ultra',
+    label: 'FLUX.1.1 Pro Ultra',
+    provider: 'fal',
+    category: 'image',
+    description: 'Top-tier FLUX output with higher resolution and finer detail.',
+    bestFor: ['Maximum quality', 'Print-grade assets'],
+    costHint: '$0.06/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/ideogram/v3',
+    label: 'Ideogram V3',
+    provider: 'fal',
+    category: 'image',
+    description: 'Ideogram text rendering and layout generation. Strong for posters, logos, and text-in-image.',
+    bestFor: ['Text in image', 'Posters', 'Logos & typography'],
+    costHint: '$0.05/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/flux/dev',
+    label: 'FLUX.1 Dev',
+    provider: 'fal',
+    category: 'image',
+    description: 'Open-weight FLUX development model. Good quality/cost balance.',
+    bestFor: ['Balanced quality', 'Custom LoRA workflows'],
+    costHint: '$0.025/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/recraft-v3',
+    label: 'Recraft V3',
+    provider: 'fal',
+    category: 'image',
+    description: 'Recraft vector-style generation, strong for design-oriented output.',
+    bestFor: ['Design assets', 'Vector-style graphics'],
+    costHint: '$0.04/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/stable-diffusion-35-large',
+    label: 'SD 3.5 Large',
+    provider: 'fal',
+    category: 'image',
+    description: 'Stability AI SD 3.5 Large. General-purpose open model.',
+    bestFor: ['General generation', 'Open-weight flexibility'],
+    costHint: '$0.03/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/playground-v25',
+    label: 'Playground v2.5',
+    provider: 'fal',
+    category: 'image',
+    description: 'Playground AI v2.5 aesthetic-focused generation.',
+    bestFor: ['Aesthetic-first output'],
+    costHint: '$0.01/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'fal-ai/auraflow',
+    label: 'AuraFlow',
+    provider: 'fal',
+    category: 'image',
+    description: 'Open AuraFlow diffusion model, low cost.',
+    bestFor: ['Budget generation'],
+    costHint: '$0.005/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+
+  // ── Replicate ────────────────────────────────────────────────────────────
+  {
+    id: 'stability-ai/stable-diffusion-3.5-medium',
+    label: 'SD 3.5 Medium',
+    provider: 'replicate',
+    category: 'image',
+    description: 'Stability AI SD 3.5 Medium, mid-tier quality at low cost.',
+    bestFor: ['General generation', 'Cost-effective batches'],
+    costHint: '$0.004/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'black-forest-labs/flux-schnell',
+    label: 'FLUX Schnell',
+    provider: 'replicate',
+    category: 'image',
+    description: 'Fast FLUX Schnell on Replicate infrastructure.',
+    bestFor: ['Fast iteration'],
+    costHint: '$0.003/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'black-forest-labs/flux-1.1-pro',
+    label: 'FLUX Pro',
+    provider: 'replicate',
+    category: 'image',
+    description: 'FLUX 1.1 Pro via Replicate. High fidelity with typography.',
+    bestFor: ['Photorealism', 'Typography'],
+    costHint: '$0.05/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'black-forest-labs/flux-1.1-pro-ultra',
+    label: 'FLUX Pro Ultra',
+    provider: 'replicate',
+    category: 'image',
+    description: 'FLUX 1.1 Pro Ultra on Replicate. Max quality tier.',
+    bestFor: ['Maximum quality', 'Print-grade assets'],
+    costHint: '$0.06/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'black-forest-labs/flux-dev',
+    label: 'FLUX Dev',
+    provider: 'replicate',
+    category: 'image',
+    description: 'FLUX Dev open-weight on Replicate.',
+    bestFor: ['Balanced quality', 'Custom workflows'],
+    costHint: '$0.025/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'stability-ai/stable-diffusion-3.5-large',
+    label: 'SD 3.5 Large',
+    provider: 'replicate',
+    category: 'image',
+    description: 'SD 3.5 Large on Replicate infrastructure.',
+    bestFor: ['General generation'],
+    costHint: '$0.035/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'recraft-ai/recraft-v3',
+    label: 'Recraft V3',
+    provider: 'replicate',
+    category: 'image',
+    description: 'Recraft V3 design-oriented generation on Replicate.',
+    bestFor: ['Design assets', 'Vector-style graphics'],
+    costHint: '$0.015/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'ideogram-ai/ideogram-v2',
+    label: 'Ideogram V2',
+    provider: 'replicate',
+    category: 'image',
+    description: 'Ideogram V2 text and layout generation.',
+    bestFor: ['Text in image', 'Posters'],
+    costHint: '$0.008/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'lucataco/dreamshaper-xl-turbo',
+    label: 'DreamShaper XL Turbo',
+    provider: 'replicate',
+    category: 'image',
+    description: 'DreamShaper XL Turbo — stylized, vibrant SDXL-based generation. Community favorite for artistic output.',
+    bestFor: ['Stylized art', 'Vibrant colors', 'Fast SDXL output'],
+    costHint: '$0.005/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'ai-forever/kandinsky-2.2',
+    label: 'Kandinsky 2.2',
+    provider: 'replicate',
+    category: 'image',
+    description: 'AI Forever Kandinsky 2.2 — multilingual (RU/EN) text-to-image model.',
+    bestFor: ['Multilingual prompts', 'Artistic generation'],
+    costHint: '$0.01/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'nvidia/sana',
+    label: 'NVIDIA Sana',
+    provider: 'replicate',
+    category: 'image',
+    description: 'NVIDIA Sana — efficient high-quality text-to-image generation.',
+    bestFor: ['Efficient generation', 'High quality at low cost'],
+    costHint: '$0.005/img',
+    supportsNegativePrompt: true,
+    supportsSeed: true,
+  },
+  {
+    id: 'bytedance/sdxl-lightning-4step',
+    label: 'SDXL Lightning 4-Step',
+    provider: 'replicate',
+    category: 'image',
+    description: 'ByteDance SDXL Lightning — 4-step distilled SDXL, ultra-fast.',
+    bestFor: ['Ultra-fast generation', 'Lowest latency SDXL'],
+    costHint: '$0.003/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'luma/photon-flash',
+    label: 'Luma Photon Flash',
+    provider: 'replicate',
+    category: 'image',
+    description: 'Luma Photon Flash — fast photorealistic image generation.',
+    bestFor: ['Photorealism', 'Fast generation'],
+    costHint: '$0.01/img',
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+
+  // ── OpenAI ───────────────────────────────────────────────────────────────
+  {
+    id: 'dall-e-3',
+    label: 'DALL-E 3',
+    provider: 'openai',
+    category: 'image',
+    description: 'OpenAI DALL-E 3, strong semantic/conceptual comprehension.',
+    bestFor: ['Conceptual prompts', 'Semantic accuracy'],
+    notes: 'Single output per call. No seed or negative prompt support.',
+    costHint: '$0.04/img',
+    supportsNegativePrompt: false,
+    supportsSeed: false,
+  },
+  {
+    id: 'dall-e-2',
+    label: 'DALL-E 2',
+    provider: 'openai',
+    category: 'image',
+    description: 'Legacy OpenAI DALL-E 2.',
+    bestFor: ['Legacy compatibility'],
+    costHint: '$0.02/img',
+    supportsNegativePrompt: false,
+    supportsSeed: false,
+  },
+];
+
+export const getModelCatalogEntry = (id: string): ModelCatalogEntry | undefined =>
+  MODEL_CATALOG.find((m) => m.id === id);
+
+export const getCatalogByProvider = (provider: ProviderId): ModelCatalogEntry[] =>
+  MODEL_CATALOG.filter((m) => m.provider === provider);

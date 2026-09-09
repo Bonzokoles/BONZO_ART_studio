@@ -51,6 +51,8 @@ export interface ModelInfo {
   maxOutputs?: number;
   supportsNegativePrompt?: boolean;
   supportsSeed?: boolean;
+  /** Replicate community models need a pinned version (POST /v1/predictions). */
+  replicateVersion?: string;
 }
 
 export interface ImageParams {
