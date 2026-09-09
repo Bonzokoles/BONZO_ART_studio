@@ -143,14 +143,9 @@ OPENAI_API_KEY=...
 
 ---
 
-## 6. Screenshot
+## 6. Gallery
 
-Main Image Generation workspace — multi-provider controls (Replicate selected), mood & details library, large prompt editor, and asset vault:
-
-![BONZO AI ART DEVZ — Image Generation](assets/screenshots/studio-main.png)
-
-<details>
-<summary>AI-generated showcase outputs (click to expand)</summary>
+AI-generated showcase outputs from the studio (FLUX.1, Nano Banana, Stable Diffusion via multi-provider pipeline):
 
 | | | |
 |---|---|---|
@@ -161,8 +156,6 @@ Main Image Generation workspace — multi-provider controls (Replicate selected)
 | ![concept art](assets/gallery/bonzo-art-1788932552871.png) | ![sci-fi](assets/gallery/Gemini_Generated_Image_d1m48yd1m48yd1m4.jpg) |
 
 > Raw model outputs demonstrating the studio's style range — from technical line-art to cinematic concept art. Full set in `assets/gallery/`.
-
-</details>
 
 ---
 
@@ -181,23 +174,9 @@ Main Image Generation workspace — multi-provider controls (Replicate selected)
 
 ## 8. Studio Interface
 
-```text
-+-----------------------------------------------------------------------------------+
-| BONZO AI ART DEVZ // STUDIO v2.6   [GENERATION] [EDITING] [ANALYSIS] [VIDEO]     |
-+-----------------------------------------------------------------------------------+
-|  CONTROL PANEL                     |  INTERACTIVE WORKSPACE                       |
-|  - Provider: [GOOGLE/FAL/REPL/OAI] |  +----------------------------------------+  |
-|  - Model Selector                  |  |                                        |  |
-|  - Aspect Ratio: [1:1, 16:9, 9:16] |  |          GENERATED CANVAS              |  |
-|  - Prompt Builder                  |  |          VIEWPORT & METRICS            |  |
-|  - Wildcards Quick-Picker          |  |                                        |  |
-|  - [GENERATE IMAGE]                |  +----------------------------------------+  |
-+-----------------------------------------------------------------------------------+
-| DEBUG CONSOLE // RECHARTS API TELEMETRY (Latency Timeline, Success Rate SLA)     |
-+-----------------------------------------------------------------------------------+
-| [ONLINE] PROVIDERS: GOOGLE / FAL / REPLICATE / OPENAI | [PORT: 5853]             |
-+-----------------------------------------------------------------------------------+
-```
+![BONZO AI ART DEVZ — Studio Interface](assets/screenshots/studio-main.png)
+
+Three-column industrial layout: left parameter panel (provider engine, model, aspect ratio, negative prompt, mood & details library), center canvas with large prompt editor and recent history, right asset vault with generated-image gallery.
 
 ---
 
