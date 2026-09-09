@@ -1,5 +1,5 @@
 @echo off
-cd /d "S:\BONZO_creative_ai_studio"
+cd /d "Q:\BONZO_creative_ai_studio"
 echo.
 echo   BONZO AI ART DEVZ // CREATIVE AI STUDIO v2.6
 echo   --------------------------------------------------

@@ -17,6 +17,7 @@ import {
   HelpCircle,
   X,
   Check,
+  Database,
 } from 'lucide-react';
 import { discoverPrompts, discoverResources } from '../../services/geminiService';
 
@@ -44,7 +45,7 @@ export const PromptLibraryTab: React.FC = () => {
   // --- State ---
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [resources, setResources] = useState<PromptResource[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<'library' | 'discover' | 'resources'>('library');
+  const [activeSubTab, setActiveSubTab] = useState<'library' | 'discover' | 'resources' | 'catalog'>('library');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [sortOption, setSortOption] = useState<'newest' | 'oldest' | 'modified'>('newest');
@@ -396,6 +397,25 @@ export const PromptLibraryTab: React.FC = () => {
             <span className="text-[10px] bg-[#0b0d12] px-1.5 py-0.5 border border-[#1f2937] text-[#9ca3af] font-mono">
               {resources.length}
             </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSubTab('catalog');
+              setSearchQuery('');
+              setDiscoverResult(null);
+            }}
+            className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold uppercase transition-colors ${
+              activeSubTab === 'catalog'
+                ? 'bg-[#1f232b] text-[#ffffff] border-l-2 border-[#d4a574]'
+                : 'text-[#9ca3af] hover:text-[#ffffff] hover:bg-[#1f232b]'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <Database size={13} />
+              <span>Katalog SD (897K)</span>
+            </div>
           </button>
         </div>
 
@@ -789,6 +809,32 @@ export const PromptLibraryTab: React.FC = () => {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB 4: Local SD Prompt Catalog (897K prompts, iframe) */}
+          {activeSubTab === 'catalog' && (
+            <div className="h-full flex flex-col select-none">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider">
+                  LOKALNY KATALOG PROMPTÓW — {`${897}K`} KART (SD 1.5 / SDXL)
+                </span>
+                <a
+                  href="/prompt-catalog/index.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-1 bg-[#181b22] hover:bg-[#1f232b] text-[#d4a574] border border-[#1f2937] hover:border-[#d4a574] font-mono font-bold text-[9px] uppercase px-3 py-1 transition-colors"
+                >
+                  <ExternalLink size={10} />
+                  <span>Otwórz w nowej karcie</span>
+                </a>
+              </div>
+              <iframe
+                src="/prompt-catalog/index.html"
+                title="Stable Diffusion Prompts Catalog"
+                className="flex-1 w-full border border-[#1f2937] bg-[#0b0d12]"
+                style={{ minHeight: '70vh', borderRadius: 0 }}
+              />
             </div>
           )}
 

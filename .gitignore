@@ -35,3 +35,7 @@ dist-ssr
 
 # Generated output
 output/
+
+# Prompt catalog junction (local Q:\ path, not part of repo)
+public/prompt-catalog/
+make_junction.bat

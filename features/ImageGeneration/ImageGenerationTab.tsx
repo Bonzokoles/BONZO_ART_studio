@@ -8,7 +8,6 @@ import type {
   HistoryItem,
 } from '../../types';
 import {
-  PRESETS,
   MODELS,
   ASPECT_RATIO_DIMENSIONS,
   executeMultiProviderGeneration,
@@ -67,7 +66,6 @@ export const ImageGenerationTab: React.FC = () => {
   // Primary Generation Parameters
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
-  const [selectedPreset, setSelectedPreset] = useState<string>('flux-fast');
   const [provider, setProvider] = useState<ProviderId>('fal');
   const [model, setModel] = useState<string>('fal-ai/flux/schnell');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1');
@@ -190,16 +188,6 @@ export const ImageGenerationTab: React.FC = () => {
     ]);
   };
 
-  // Preset Selection Handler
-  const handleSelectPreset = (presetId: string) => {
-    setSelectedPreset(presetId);
-    const p = PRESETS.find((item) => item.id === presetId);
-    if (p) {
-      setProvider(p.provider);
-      setModel(p.model);
-    }
-  };
-
   // Provider Selection Handler
   const handleSelectProvider = (p: ProviderId) => {
     setProvider(p);
@@ -207,8 +195,6 @@ export const ImageGenerationTab: React.FC = () => {
     if (available.length > 0) {
       setModel(available[0].id);
     }
-    const matchingPreset = PRESETS.find((pr) => pr.provider === p && pr.model === model);
-    setSelectedPreset(matchingPreset ? matchingPreset.id : '');
   };
 
   // Prompt Enhancer Handler
@@ -432,7 +418,6 @@ export const ImageGenerationTab: React.FC = () => {
   };
 
   const filteredModels = MODELS.filter((m) => m.provider === provider);
-  const filteredPresets = PRESETS.filter((p) => p.provider === provider);
   const selectedModelDef = MODELS.find((m) => m.id === model) || filteredModels[0] || MODELS[0];
   const dims = ASPECT_RATIO_DIMENSIONS[aspectRatio];
   const activeImage = generatedImages[activeImageIndex] || null;
@@ -455,25 +440,6 @@ export const ImageGenerationTab: React.FC = () => {
                 <span>PARAMETERS</span>
               </span>
               <span className="text-[#9ca3af] text-[9px]">INFERENCE CONFIG</span>
-            </div>
-
-            {/* Preset Selector */}
-            <div className="space-y-1">
-              <label htmlFor="preset-select" className="text-[#9ca3af] uppercase tracking-wider text-[10px] block">
-                PRESET
-              </label>
-              <select
-                id="preset-select"
-                value={selectedPreset}
-                onChange={(e) => handleSelectPreset(e.target.value)}
-                className="w-full bg-[#0b0d12] border border-[#1f2937] px-2 py-1.5 text-[#ffffff] focus:border-[#d4a574] focus:outline-none text-[11px]"
-              >
-                {filteredPresets.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label} - {PROVIDER_LABELS[p.provider]}
-                  </option>
-                ))}
-              </select>
             </div>
 
             {/* Provider Selector (Pills with 3px left border) */}
