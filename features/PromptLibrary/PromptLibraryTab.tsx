@@ -19,7 +19,7 @@ import {
   Check,
   Database,
 } from 'lucide-react';
-import { discoverPrompts, discoverResources } from '../../services/geminiService';
+import { discoverPrompts, discoverResources, rewritePromptWithOpenAI } from '../../services/geminiService';
 
 export interface Prompt {
   id: string;
@@ -45,7 +45,7 @@ export const PromptLibraryTab: React.FC = () => {
   // --- State ---
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [resources, setResources] = useState<PromptResource[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<'library' | 'discover' | 'resources' | 'catalog'>('library');
+  const [activeSubTab, setActiveSubTab] = useState<'library' | 'discover' | 'resources' | 'catalog' | 'rewrite'>('library');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [sortOption, setSortOption] = useState<'newest' | 'oldest' | 'modified'>('newest');
@@ -65,6 +65,11 @@ export const PromptLibraryTab: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [discoverMode, setDiscoverMode] = useState<'prompts' | 'resources'>('prompts');
   const [discoverResult, setDiscoverResult] = useState<any | null>(null);
+
+  // Prompt Rewrite State (Gemini przepisuje prompt składniowo/technicznie)
+  const [rewriteInput, setRewriteInput] = useState('');
+  const [rewriteOutput, setRewriteOutput] = useState('');
+  const [isRewriting, setIsRewriting] = useState(false);
 
   // Clipboard feedback
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -264,6 +269,21 @@ export const PromptLibraryTab: React.FC = () => {
     }
   };
 
+  const handleRewritePrompt = async () => {
+    if (!rewriteInput.trim() || isRewriting) return;
+    setIsRewriting(true);
+    setRewriteOutput('');
+    try {
+      const rewritten = await rewritePromptWithOpenAI(rewriteInput);
+      setRewriteOutput(rewritten);
+      triggerToast('PROMPT REWRITTEN BY OPENAI');
+    } catch (err: any) {
+      alert(err.message || 'Nie udało się przepisać promptu.');
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
   const handleImportPrompt = (title: string, content: string, category: string) => {
     setEditingPrompt(null);
     setFormTitle(title);
@@ -415,6 +435,25 @@ export const PromptLibraryTab: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Database size={13} />
               <span>Katalog SD (897K)</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSubTab('rewrite');
+              setSearchQuery('');
+              setDiscoverResult(null);
+            }}
+            className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold uppercase transition-colors ${
+              activeSubTab === 'rewrite'
+                ? 'bg-[#1f232b] text-[#ffffff] border-l-2 border-[#d4a574]'
+                : 'text-[#9ca3af] hover:text-[#ffffff] hover:bg-[#1f232b]'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <Sparkles size={13} />
+              <span>Przepisz Prompt (OpenAI)</span>
             </div>
           </button>
         </div>
@@ -835,6 +874,72 @@ export const PromptLibraryTab: React.FC = () => {
                 className="flex-1 w-full border border-[#1f2937] bg-[#0b0d12]"
                 style={{ minHeight: '70vh', borderRadius: 0 }}
               />
+            </div>
+          )}
+
+          {/* TAB 5: Rewrite Prompt (Gemini) */}
+          {activeSubTab === 'rewrite' && (
+            <div className="space-y-4 max-w-2xl select-text">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider">
+                  PRZEPISZ PROMPT — OPENAI POPRAWI SKŁADNIĘ I TECHNIKĘ
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] text-[#6b7280] font-bold uppercase tracking-wider">
+                  TWÓJ PROMPT (WKLEJ)
+                </label>
+                <textarea
+                  rows={6}
+                  value={rewriteInput}
+                  onChange={(e) => setRewriteInput(e.target.value)}
+                  placeholder="Wklej tutaj swój prompt, np. 'a cat in space floating, very cool, high detail, awesome'"
+                  className="w-full bg-[#0b0d12] border border-[#1f2937] text-[#ffffff] font-mono text-xs p-2 outline-none focus:border-[#d4a574] resize-y"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRewritePrompt}
+                disabled={isRewriting || !rewriteInput.trim()}
+                className="flex items-center space-x-1.5 bg-[#d4a574] hover:bg-[#1f232b] text-[#0b0d12] hover:text-[#d4a574] border border-[#d4a574] font-mono font-bold text-xs uppercase px-4 py-2 transition-colors disabled:opacity-50"
+              >
+                <Sparkles size={13} className={isRewriting ? 'animate-spin' : ''} />
+                <span>{isRewriting ? 'PRZEPISYWANIE...' : 'PRZEPISZ PROMPT'}</span>
+              </button>
+
+              {rewriteOutput && (
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] text-[#6b7280] font-bold uppercase tracking-wider">
+                    PRZEPISANY PROMPT
+                  </label>
+                  <div className="bg-[#0b0d12] border border-[#1f2937] p-3 font-mono text-xs text-[#d4a574] leading-relaxed whitespace-pre-wrap">
+                    {rewriteOutput}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(rewriteOutput);
+                        triggerToast('PROMPT COPIED TO CLIPBOARD');
+                      }}
+                      className="flex items-center space-x-1 bg-[#181b22] hover:bg-[#1f232b] text-[#d4a574] border border-[#1f2937] hover:border-[#d4a574] font-mono font-bold text-[9px] uppercase px-3 py-1 transition-colors"
+                    >
+                      <Copy size={10} />
+                      <span>Kopiuj</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleImportPrompt('Przepisany prompt', rewriteOutput, 'FLUX / SDXL')}
+                      className="flex items-center space-x-1 bg-[#181b22] hover:bg-[#1f232b] text-[#ffffff] border border-[#1f2937] hover:border-[#d4a574] font-mono font-bold text-[9px] uppercase px-3 py-1 transition-colors"
+                    >
+                      <Plus size={10} />
+                      <span>Zapisz do biblioteki</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -16,7 +16,7 @@ import {
   deleteHistoryItem,
   clearGenerationHistory,
 } from '../../services/providerEngine';
-import { enhancePromptWithGemini } from '../../services/geminiService';
+import { rewritePromptWithOpenAI } from '../../services/geminiService';
 import {
   PROVIDER_LABELS,
   PROVIDER_COLORS,
@@ -27,6 +27,7 @@ import { ProgressIndicator } from '../../components/ProgressIndicator';
 import { RightStudioPanel } from '../../components/RightStudioPanel';
 import { SaveStyleModal } from '../../components/SaveStyleModal';
 import { ImageLightbox, LightboxMetadata } from '../../components/ImageLightbox';
+import { MoodDetailsLibrary } from '../../components/MoodDetailsLibrary';
 import {
   getArtistPromptAddition,
   type SavedStylePreset,
@@ -64,8 +65,12 @@ const getTimestamp = (): string => {
 
 export const ImageGenerationTab: React.FC = () => {
   // Primary Generation Parameters
-  const [prompt, setPrompt] = useState('');
-  const [negativePrompt, setNegativePrompt] = useState('');
+  const [prompt, setPrompt] = useState<string>(() => {
+    try { return localStorage.getItem('bonzo-studio-prompt') || ''; } catch { return ''; }
+  });
+  const [negativePrompt, setNegativePrompt] = useState<string>(() => {
+    try { return localStorage.getItem('bonzo-studio-negative-prompt') || ''; } catch { return ''; }
+  });
   const [provider, setProvider] = useState<ProviderId>('fal');
   const [model, setModel] = useState<string>('fal-ai/flux/schnell');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1');
@@ -137,6 +142,14 @@ export const ImageGenerationTab: React.FC = () => {
     setHistory(loadGenerationHistory());
   };
 
+  // Persist prompt + negative prompt to localStorage (survives tab switches)
+  useEffect(() => {
+    try {
+      localStorage.setItem('bonzo-studio-prompt', prompt);
+      localStorage.setItem('bonzo-studio-negative-prompt', negativePrompt);
+    } catch { /* storage full/unavailable */ }
+  }, [prompt, negativePrompt]);
+
   useEffect(() => {
     refreshHistory();
     const handleKeyChange = () => {
@@ -197,17 +210,27 @@ export const ImageGenerationTab: React.FC = () => {
     }
   };
 
-  // Prompt Enhancer Handler
-  const handleEnhance = async () => {
+  // Clear Prompt Handler — wymazuje prompt, negative i resetuje seed
+  const handleClearPrompt = () => {
+    setPrompt('');
+    setNegativePrompt('');
+    setError(null);
+    setGeneratedImages([]);
+    setActiveImageIndex(0);
+    setLastGenInfo(null);
+    addLog('INFO', 'CLEAR_PROMPT: Prompt and negative prompt cleared');
+  };
+  const handleRewrite = async () => {
     if (!prompt.trim() || isEnhancing) return;
     setIsEnhancing(true);
-    addLog('INFO', `ENHANCE_PROMPT: Expanding concept "${prompt.slice(0, 40)}..."`);
+    addLog('INFO', `REWRITE_PROMPT: Rewriting syntax "${prompt.slice(0, 40)}..."`);
     try {
-      const enhanced = await enhancePromptWithGemini(prompt);
-      setPrompt(enhanced);
-      addLog('OK', `PROMPT_EXPANDED: Generated ${enhanced.length} characters`);
-    } catch (err) {
-      addLog('WARN', 'Prompt enhancement fallback applied');
+      const rewritten = await rewritePromptWithOpenAI(prompt);
+      setPrompt(rewritten);
+      addLog('OK', `PROMPT_REWRITTEN: ${rewritten.length} characters`);
+    } catch (err: any) {
+      addLog('WARN', err?.message || 'Prompt rewrite failed');
+      alert(err?.message || 'Prompt rewrite failed');
     } finally {
       setIsEnhancing(false);
     }
@@ -533,38 +556,34 @@ export const ImageGenerationTab: React.FC = () => {
               </div>
             </div>
 
-            {/* Prompt Textarea */}
+            {/* Negative Prompt (moved here — prompt lives in center PROMPT EDITOR) */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label htmlFor="prompt-input" className="text-[#9ca3af] uppercase tracking-wider text-[10px]">
-                  PROMPT
+                <label htmlFor="negative-prompt" className="text-[#9ca3af] uppercase tracking-wider text-[10px] block">
+                  NEGATIVE PROMPT
                 </label>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[#6b7280] text-[9px]">
-                    {prompt.length}/8000
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleEnhance}
-                    disabled={isEnhancing || !prompt.trim()}
-                    className="flex items-center space-x-1 text-[#d4a574] hover:text-[#e0b585] disabled:text-[#4b5563] text-[9px] uppercase font-bold"
-                    title="Expand prompt semantics with Gemini"
-                  >
-                    <Sparkles size={10} className={isEnhancing ? 'animate-spin' : ''} />
-                    <span>{isEnhancing ? 'EXPANDING...' : '[ENHANCE]'}</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleClearPrompt}
+                  className="text-[#6b7280] hover:text-[#ef4444] text-[9px] uppercase font-bold flex items-center space-x-1"
+                  title="Wyczyść prompt i negative prompt"
+                >
+                  <XCircle size={11} />
+                  <span>[CLEAR]</span>
+                </button>
               </div>
               <textarea
-                id="prompt-input"
-                rows={4}
-                maxLength={8000}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Detailed description of visual subject, lighting, mood, artistic medium..."
+                id="negative-prompt"
+                rows={2}
+                value={negativePrompt}
+                onChange={(e) => setNegativePrompt(e.target.value)}
+                placeholder="blurry, distorted, low quality, artifacts, watermark..."
                 className="w-full bg-[#0b0d12] border border-[#1f2937] p-2 text-[#ffffff] placeholder-[#525660] focus:border-[#d4a574] focus:outline-none text-[11px] leading-relaxed resize-y"
               />
             </div>
+
+            {/* Mood & Details Library — klikalne kafelki dodają frazy do promptu */}
+            <MoodDetailsLibrary onAppendPrompt={handleAppendPrompt} />
 
             {/* Advanced Settings Toggle */}
             <div className="border border-[#1f2937] bg-[#0b0d12]">
@@ -579,21 +598,6 @@ export const ImageGenerationTab: React.FC = () => {
 
               {showAdvanced && (
                 <div className="p-2 border-t border-[#1f2937] space-y-2.5 bg-[#0e1017]">
-                  {/* Negative Prompt */}
-                  <div className="space-y-1">
-                    <label htmlFor="negative-prompt" className="text-[#9ca3af] uppercase tracking-wider text-[9px] block">
-                      NEGATIVE PROMPT
-                    </label>
-                    <input
-                      id="negative-prompt"
-                      type="text"
-                      value={negativePrompt}
-                      onChange={(e) => setNegativePrompt(e.target.value)}
-                      placeholder="blurry, distorted, low quality, artifacts..."
-                      className="w-full bg-[#0b0d12] border border-[#1f2937] px-2 py-1 text-[#ffffff] placeholder-[#525660] focus:border-[#d4a574] focus:outline-none text-[10px]"
-                    />
-                  </div>
-
                   {/* Number of Outputs */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-[9px]">
@@ -895,6 +899,40 @@ export const ImageGenerationTab: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Large Prompt Editor — between canvas and history */}
+        <div className="bg-[#11131a] border border-[#1f2937] p-2 space-y-1.5 shrink-0">
+          <div className="flex items-center justify-between text-[10px]">
+            <div className="flex items-center space-x-1.5">
+              <Sparkles size={12} className="text-[#d4a574]" />
+              <span className="font-bold text-[#ffffff] uppercase tracking-wider text-[10px]">
+                PROMPT EDITOR
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-[#6b7280] text-[9px]">{prompt.length}/8000</span>
+              <button
+                type="button"
+                onClick={handleRewrite}
+                disabled={isEnhancing || !prompt.trim()}
+                className="flex items-center space-x-1 text-[#d4a574] hover:text-[#e0b585] disabled:text-[#4b5563] text-[9px] uppercase font-bold"
+                title="Przepisz prompt składniowo i technicznie (OpenAI)"
+              >
+                <Sparkles size={10} className={isEnhancing ? 'animate-spin' : ''} />
+                <span>{isEnhancing ? 'REWRITING...' : '[REWRITE]'}</span>
+              </button>
+            </div>
+          </div>
+          <textarea
+            id="center-prompt-editor"
+            rows={5}
+            maxLength={8000}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Type or paste your full prompt here. Larger workspace for detailed descriptions — lighting, mood, medium, composition..."
+            className="w-full bg-[#0b0d12] border border-[#1f2937] p-2 text-[#ffffff] placeholder-[#525660] focus:border-[#d4a574] focus:outline-none text-[12px] leading-relaxed resize-y font-mono"
+          />
+        </div>
 
         {/* Center Canvas Bottom: History Strip */}
         <div className="bg-[#11131a] border border-[#1f2937] p-2 space-y-1.5 shrink-0">

@@ -15,7 +15,7 @@ import {
 import { findArtistById } from './data/allArtists';
 import { debugLogger, type LogEntry } from './services/debugLogger';
 import type { FeatureTab, VeoOperationContext } from './types';
-import { Activity, Sparkles, Terminal, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
+import { Activity, Sparkles, Terminal, ChevronUp, ChevronDown, AlertCircle, RefreshCw } from 'lucide-react';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FeatureTab>('Image Generation');
@@ -178,7 +178,18 @@ const App: React.FC = () => {
           </div>
 
           {/* Center Debug Console Trigger Button */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
+            <button
+              id="btn-reset-session"
+              type="button"
+              onClick={() => window.location.reload()}
+              className="h-6 px-2.5 flex items-center space-x-1.5 text-[10px] font-mono font-bold uppercase border transition-all bg-[#141720] text-[#d4d4d8] border-[#1f2937] hover:border-[#d4a574] hover:text-white"
+              style={{ borderRadius: 0 }}
+              title="Odśwież aplikację (reset stanu)"
+            >
+              <RefreshCw size={12} className="text-[#d4a574]" />
+              <span>[REFRESH]</span>
+            </button>
             <button
               id="btn-toggle-debug-console"
               type="button"

@@ -228,6 +228,95 @@ User concept: "${basePrompt}"`,
   }
 };
 
+// --- GEMINI PROMPT REWRITER (składnia + technika) ---
+// Przepisuje wklejony prompt, żeby był lepszy składniowo i technicznie,
+// bez zmiany intencji i bez rozbudowy artystycznej.
+export const rewritePromptWithGemini = async (basePrompt: string): Promise<string> => {
+  const ai = getGenAI();
+  if (!ai) throw new Error("Brak klucza API dla usługi Google Gemini.");
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Jesteś ekspertem inżynierii promptów do generatorów obrazów (Stable Diffusion, FLUX, Midjourney).
+
+Przepisz poniższy prompt tak, aby był lepszy SKŁADNIOWO i TECHNICZNIE, ZACHOWUJĄC dokładnie tę samą intencję i temat:
+- popraw kolejność deskryptorów (najważniejszy temat na początku),
+- ujednolić separator (przecinki),
+- usuń powtórzenia i sprzeczności,
+- zamień niejasne sformułowania na precyzyjne terminy techniczne,
+- NIE rozbudowuj artystycznie i NIE dodawaj nowych elementów, których nie ma w oryginale.
+
+Zwróć WYŁĄCZNIE przepisany prompt jako czysty tekst, bez cudzysłowów, bez komentarza.
+
+Prompt do przepisania:
+"${basePrompt}"`,
+    });
+
+    const text = response.text;
+    if (!text || !text.trim()) {
+      throw new Error("Gemini zwróciło pustą odpowiedź.");
+    }
+    return text.trim();
+  } catch (error: any) {
+    console.error("Prompt Rewrite Error:", error);
+    const detail = error?.message || String(error);
+    throw new Error(`Nie udało się przepisać promptu (${detail})`);
+  }
+};
+
+// --- OPENAI PROMPT REWRITER (składnia + technika) ---
+// Przepisuje wklejony prompt przez OpenAI (gpt-4o-mini) — tańsza alternatywa
+// dla Gemini, gdy klucz Gemini jest nieważny/nieaktywny.
+export const rewritePromptWithOpenAI = async (basePrompt: string): Promise<string> => {
+  const key = getKey('OPENAI_API_KEY');
+  if (!key) throw new Error("Brak klucza API dla OpenAI.");
+
+  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const endpoint = isLocalhost
+    ? '/api-openai/v1/chat/completions'
+    : 'https://api.openai.com/v1/chat/completions';
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'Jesteś ekspertem inżynierii promptów do generatorów obrazów (Stable Diffusion, FLUX, Midjourney). Przepisujesz prompt, żeby był lepszy składniowo i technicznie, ZACHOWUJĄC dokładnie tę samą intencję i temat: popraw kolejność deskryptorów (najważniejszy temat na początku), ujednolić separator (przecinki), usuń powtórzenia i sprzeczności, zamień niejasne sformułowania na precyzyjne terminy techniczne. NIE rozbudowuj artystycznie i NIE dodawaj nowych elementów. Zwróć WYŁĄCZNIE przepisany prompt jako czysty tekst, bez cudzysłowów, bez komentarza.',
+          },
+          {
+            role: 'user',
+            content: basePrompt,
+          },
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data?.choices?.[0]?.message?.content;
+    if (!text || !text.trim()) {
+      throw new Error('OpenAI zwróciło pustą odpowiedź.');
+    }
+    return text.trim();
+  } catch (error: any) {
+    console.error('OpenAI Prompt Rewrite Error:', error);
+    throw new Error(`Nie udało się przepisać promptu (${error?.message || String(error)})`);
+  }
+};
+
 // --- GEMINI ARTIST SUGGESTER ---
 export const suggestArtistsWithGemini = async (
   prompt: string,
@@ -779,5 +868,58 @@ export const discoverResources = async (topic: string): Promise<any> => {
   } catch (error) {
     console.error("Resource Discovery Error:", error);
     throw new Error("Nie udało się wyszukać zasobów. Spróbuj ponownie.");
+  }
+};
+
+// Organize the Mood & Details library: assign uncategorized/user phrases
+// to the best-fitting category, or propose a new category when none fits.
+// Returns a map of phraseId -> categoryId for the library to apply.
+export const organizeMoodLibrary = async (
+  phrases: { id: string; phrase: string }[],
+  existingCategories: string[]
+): Promise<{ assignments: { id: string; categoryId: string }[]; newCategories?: string[] }> => {
+  const ai = getGenAI();
+  if (!ai) throw new Error("Brak klucza API dla usługi Google Gemini.");
+
+  const catList = existingCategories.map((c) => `"${c}"`).join(", ");
+  const phraseList = phrases.map((p) => `- id: ${p.id} | phrase: "${p.phrase}"`).join("\n");
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Jesteś kuratorem biblioteki fraz opisowych do generowania obrazów (Stable Diffusion / FLUX).
+
+Masz istniejące kategorie (użyj dokładnie tych ID, jeśli pasują):
+${catList}
+
+Masz do przypisania następujące frazy (każda ma id):
+${phraseList}
+
+Zadanie: przypisz każdą frazę do NAJLEPIEJ pasującej istniejącej kategorii. Jeśli fraza NIE pasuje do żadnej istniejącej, zaproponuj dla niej nową kategorię (dodaj do pola "newCategories" jako opisową nazwę, np. "Architektura / Architecture").
+
+Zwróć WYŁĄCZNIE czysty JSON (bez markdown), o strukturze:
+{
+  "assignments": [
+    { "id": "<id frazy>", "categoryId": "<id istniejącej kategorii>" }
+  ],
+  "newCategories": ["<nowa kategoria 1>", "<nowa kategoria 2>"]
+}
+
+Reguły:
+- Każda fraza MUSI mieć wpis w "assignments".
+- Dla fraz które nie pasują do istniejących kategorii, wpisz categoryId jako "_new" i dodaj proponowaną nazwę do newCategories.
+- Nie wymyślaj kategorii, których nie ma — używaj tylko istniejących ID lub "_new".
+- Zachowaj frazy po angielsku, nowe kategorie nazywaj dwujęzycznie (EN / PL).`,
+    });
+
+    const text = response.text || "";
+    const parsed = cleanAndParseJSON(text);
+    return {
+      assignments: Array.isArray(parsed.assignments) ? parsed.assignments : [],
+      newCategories: Array.isArray(parsed.newCategories) ? parsed.newCategories : [],
+    };
+  } catch (error) {
+    console.error("Mood Library Organize Error:", error);
+    throw new Error("Nie udało się uporządkować biblioteki przez Gemini.");
   }
 };
