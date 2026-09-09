@@ -143,9 +143,14 @@ OPENAI_API_KEY=...
 
 ---
 
-## 6. Gallery
+## 6. Screenshot
 
-AI-generated showcase outputs from the studio (FLUX.1, Nano Banana, Stable Diffusion via multi-provider pipeline):
+Main Image Generation workspace — multi-provider controls (Replicate selected), mood & details library, large prompt editor, and asset vault:
+
+![BONZO AI ART DEVZ — Image Generation](assets/screenshots/studio-main.png)
+
+<details>
+<summary>AI-generated showcase outputs (click to expand)</summary>
 
 | | | |
 |---|---|---|
@@ -155,7 +160,9 @@ AI-generated showcase outputs from the studio (FLUX.1, Nano Banana, Stable Diffu
 |---|---|
 | ![concept art](assets/gallery/bonzo-art-1788932552871.png) | ![sci-fi](assets/gallery/Gemini_Generated_Image_d1m48yd1m48yd1m4.jpg) |
 
-> These are raw model outputs demonstrating the studio's style range — from technical line-art to cinematic concept art. Full set in `assets/gallery/`.
+> Raw model outputs demonstrating the studio's style range — from technical line-art to cinematic concept art. Full set in `assets/gallery/`.
+
+</details>
 
 ---
 
