@@ -23,10 +23,10 @@ A dense, high-performance generative art workbench engineered for visual artists
 
 | Provider | Supported Models & Engines | Auth |
 |---|---|---|
-| **Google** | Nano Banana (Gemini 2.5 Flash Image), **Nano Banana 2** (Gemini 3.1 Flash Image), **Nano Banana 2 Lite** (Gemini 3.1 Flash Lite Image), **Nano Banana Pro** (Gemini 3 Pro Image), **Veo 3.1** video (standard / fast / lite) | `GEMINI_API_KEY` |
+| **Google** | Nano Banana (Gemini 2.5 Flash Image), **Nano Banana 2** (Gemini 3.1 Flash Image), **Nano Banana 2 Lite** (Gemini 3.1 Flash Lite Image), **Nano Banana Pro** (Gemini 3 Pro Image), **Veo 3.1** video generation (real-time, with polling + estimated price) | `GEMINI_API_KEY` |
 | **fal.ai** | FLUX.1 [schnell], FLUX.1 [dev], FLUX.1.1 Pro, **FLUX.1.1 Pro Ultra**, **Ideogram V3**, Recraft V3, SD 3.5 Large, Playground v2.5, AuraFlow | `FAL_KEY` |
-| **Replicate** | FLUX Schnell / Dev / Pro / **Pro Ultra**, SD 3.5 Medium / Large, Recraft V3, Ideogram V2 | `REPLICATE_API_TOKEN` |
-| **OpenAI** | DALL-E 3 (HD / Standard), DALL-E 2 | `OPENAI_API_KEY` |
+| **Replicate** | FLUX Schnell / Dev / 1.1 Pro / **1.1 Pro Ultra**, SD 3.5 Medium / Large, Recraft V3, Ideogram V2, DreamShaper XL Turbo, Kandinsky 2.2, NVIDIA Sana, SDXL Lightning 4-step, Luma Photon Flash | `REPLICATE_API_TOKEN` |
+| **OpenAI** | DALL-E 3 (HD / Standard), DALL-E 2, **gpt-4o-mini** (prompt rewriting) | `OPENAI_API_KEY` |
 
 **Provider isolation is strict.** The model dropdown is filtered by the selected provider — pick `REPLICATE` and you see only Replicate models; pick `fal.ai` and you see only fal.ai models. No cross-provider mixing.
 
@@ -49,22 +49,28 @@ A dense, high-performance generative art workbench engineered for visual artists
 ### 3. Prompt Library + AI Discovery
 - Curated prompt library across FLUX / Midjourney / GPT / Claude / Gemini / DALL-E.
 - **"Odkrywaj (AI Agent)"** — live prompt & resource discovery using Gemini 2.5 Flash with **Google Search Grounding**: the model searches Reddit, Discord, and code repos in real time and returns sourced, trend-aware prompts.
+- **"Przepisz Prompt (OpenAI)"** — rewrite a pasted prompt for better syntax and technical precision via `gpt-4o-mini`, preserving intent without artistic expansion.
+- **"Katalog SD (897K)"** — local iframe viewer into a 897,000-prompt catalog (SD 1.5 / SDXL) with model + size + score metadata, served from a junction directory.
 
-### 4. Custom Style Preset System
+### 4. Mood & Details Library
+- Clickable phrase tiles (precision / painting / backdrop / lighting / render) that append ready-made descriptors to the prompt.
+- Add your own phrases (persisted in localStorage) and have Gemini auto-organize them into categories.
+
+### 5. Custom Style Preset System
 - Create and persist custom style formulas directly from generated outputs.
 - Local browser persistence with instant recall, custom tagging, and deletion controls.
 
-### 5. Real-time Debug Console & API Telemetry
+### 6. Real-time Debug Console & API Telemetry
 - Inspect full HTTP request/response payloads with status codes, latency, and error traces.
 - Level filters (`REQ`, `RES`, `ERR`, `INFO`, `WARN`) and full-text search.
 - Recharts performance analytics: latency timeline, SLA success rate, P95 breakdown.
 
-### 6. Timeline Studio + FFmpeg NLE Engine
+### 7. Timeline Studio + FFmpeg NLE Engine
 - Multi-track timeline for composing video/audio assets.
 - Backend `uploadServer.ts` (port 3219) renders the timeline to H.264 MP4 via `-filter_complex` FFmpeg composition (offsets, entry times, tracks).
 - Async rendering — never blocks the main server process.
 
-### 7. Multi-Window Modular Workstation
+### 8. Multi-Window Modular Workstation
 - Popout windows (Wildcards Library, Video Config, Workflows) with cross-window `postMessage` / `BroadcastChannel` prompt injection.
 
 ---
@@ -137,18 +143,19 @@ OPENAI_API_KEY=...
 
 ---
 
-## 6. Screenshots
+## 6. Gallery
 
-<!--
-  Replace the placeholders below with real screenshots.
-  Drop PNGs into ./docs/screenshots/ and reference them here.
+AI-generated showcase outputs from the studio (FLUX.1, Nano Banana, Stable Diffusion via multi-provider pipeline):
 
-  ![Image Generation](./docs/screenshots/generation.png)
-  ![Prompt Library](./docs/screenshots/prompt-library.png)
-  ![Timeline Studio](./docs/screenshots/timeline.png)
--->
+| | | |
+|---|---|---|
+| ![line-art megastructure](assets/gallery/bonzo-art-1788928721549.png) | ![sci-fi robots](assets/gallery/bonzo-art-1788936299711.png) | ![character lineup](assets/gallery/bonzo-art-1788933174959.png) |
 
-*Screenshots coming soon.*
+| | |
+|---|---|
+| ![concept art](assets/gallery/bonzo-art-1788932552871.png) | ![sci-fi](assets/gallery/Gemini_Generated_Image_d1m48yd1m48yd1m4.jpg) |
+
+> These are raw model outputs demonstrating the studio's style range — from technical line-art to cinematic concept art. Full set in `assets/gallery/`.
 
 ---
 
