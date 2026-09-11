@@ -7,7 +7,8 @@ export type FeatureTab =
   | 'Video Generation'
   | 'Video Continuation'
   | 'Prompt Library'
-  | 'Timeline Studio';
+  | 'Timeline Studio'
+  | 'Workflows';
 
 export type AppMode = 'canvas' | 'workflow';
 export type LeftTab = 'generate' | 'nodes' | 'styles' | 'train';
@@ -144,6 +145,14 @@ export interface WorkflowConnection {
   fromOutputId: string;
   toNodeId: string;
   toInputId: string;
+}
+
+export interface AnalysisReport {
+  description: string;
+  objects: string[];
+  colors: string[];
+  style: string;
+  mood: string;
 }
 
 export interface ProgressStage {

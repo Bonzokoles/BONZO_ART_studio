@@ -9,6 +9,7 @@ import { VideoGenerationTab } from './features/VideoGeneration/VideoGenerationTa
 import { VideoContinuationTab } from './features/VideoContinuation/VideoContinuationTab';
 import { PromptLibraryTab } from './features/PromptLibrary/PromptLibraryTab';
 import { TimelineStudioTab } from './features/TimelineStudio/TimelineStudioTab';
+import { WorkflowsTab } from './features/Workflows/WorkflowsTab';
 import {
   getArtistPromptAddition,
 } from './data/artistsData';
@@ -131,6 +132,8 @@ const App: React.FC = () => {
         return <PromptLibraryTab />;
       case 'Timeline Studio':
         return <TimelineStudioTab />;
+      case 'Workflows':
+        return <WorkflowsTab />;
       default:
         return <ImageGenerationTab />;
     }

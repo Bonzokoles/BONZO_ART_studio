@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { UploadedFile, ProgressStage, TelemetryLog, HistoryItem } from '../../types';
+import type { UploadedFile, ProgressStage, TelemetryLog, HistoryItem, ProviderId } from '../../types';
 import { ImageUpload } from '../../components/ImageUpload';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { ProgressIndicator } from '../../components/ProgressIndicator';
 import { AssetLibraryPanel } from '../../components/AssetLibraryPanel';
 import { ImageLightbox, LightboxMetadata } from '../../components/ImageLightbox';
-import { editImage } from '../../services/geminiService';
 import {
   loadGenerationHistory,
   saveToGenerationHistory,
   deleteHistoryItem,
   clearGenerationHistory,
+  MODELS,
+  executeImageEdit,
 } from '../../services/providerEngine';
 import {
   Sparkles,
@@ -78,6 +79,12 @@ export const ImageEditingTab: React.FC = () => {
   const [viewMode, setViewMode] = useState<'side-by-side' | 'after-only'>('side-by-side');
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // Provider + Model selector state
+  const [provider, setProvider] = useState<ProviderId>('google');
+  const [editModel, setEditModel] = useState('gemini-2.5-flash-image');
+  const editProviders: ProviderId[] = ['google', 'fal', 'replicate'];
+  const filteredEditModels = MODELS.filter((m) => m.category === 'edit' && m.provider === provider);
 
   // Lightbox State
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -156,8 +163,8 @@ export const ImageEditingTab: React.FC = () => {
       initialIndex: uploadedFile ? 1 : 0,
       metadata: {
         prompt: `[EDIT DIRECTIVE] ${prompt}`,
-        provider: 'google',
-        model: 'gemini-2.5-flash-image',
+        provider: provider,
+        model: editModel,
         aspectRatio: 'ORIGINAL',
         timestamp: getTimestamp(),
         title: 'Generative Image Inpainting / Edit',
@@ -210,7 +217,7 @@ export const ImageEditingTab: React.FC = () => {
       {
         timestamp: getTimestamp(),
         level: 'RUN',
-        message: `DISPATCH -> MODEL: gemini-2.5-flash-image | PAYLOAD: ${Math.round(
+        message: `DISPATCH -> MODEL: ${editModel} [${provider.toUpperCase()}] | PAYLOAD: ${Math.round(
           uploadedFile.base64.length / 1024
         )} KB`,
       },
@@ -244,7 +251,7 @@ export const ImageEditingTab: React.FC = () => {
     stageTimerRef.current = [t1, t2, t3];
 
     try {
-      const resultUrl = await editImage(prompt, uploadedFile);
+      const resultUrl = await executeImageEdit({ prompt, image: uploadedFile, provider, model: editModel });
       clearStageTimers();
       setCurrentStageIndex(3);
       setProgressPercent(100);
@@ -256,8 +263,8 @@ export const ImageEditingTab: React.FC = () => {
         id: `edit-${Date.now()}`,
         timestamp: getTimestamp(),
         prompt: `[EDIT] ${prompt}`,
-        provider: 'google',
-        model: 'gemini-2.5-flash-image',
+        provider: provider,
+        model: editModel,
         aspectRatio: '1:1',
         width: 1024,
         height: 1024,
@@ -294,7 +301,46 @@ export const ImageEditingTab: React.FC = () => {
                 <Sliders size={13} className="text-[#d4a574]" />
                 <span>EDIT CONTROLS</span>
               </span>
-              <span className="text-[#9ca3af] text-[9px]">GEMINI INPAINT</span>
+              <span className="text-[#9ca3af] text-[9px]">{provider.toUpperCase()} EDIT</span>
+            </div>
+
+            {/* Provider Selector */}
+            <div className="space-y-1">
+              <label className="text-[#9ca3af] uppercase tracking-wider text-[10px] block">PROVIDER ENGINE</label>
+              <div className="grid grid-cols-3 gap-1">
+                {editProviders.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => {
+                      setProvider(p);
+                      const m = MODELS.find((mm) => mm.category === 'edit' && mm.provider === p);
+                      if (m) setEditModel(m.id);
+                    }}
+                    className={`px-2 py-1 text-[10px] font-bold uppercase border ${
+                      provider === p
+                        ? 'bg-[#181b22] text-[#ffffff] border-[#d4a574]'
+                        : 'bg-[#0b0d12] text-[#9ca3af] border-[#1f2937] hover:border-[#2a3140]'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Model Selector */}
+            <div className="space-y-1">
+              <label className="text-[#9ca3af] uppercase tracking-wider text-[10px] block">EDIT MODEL</label>
+              <select
+                value={editModel}
+                onChange={(e) => setEditModel(e.target.value)}
+                className="w-full bg-[#0b0d12] border border-[#1f2937] text-[#d4d4d8] px-2 py-1.5 text-[10px] focus:border-[#d4a574] focus:outline-none"
+              >
+                {filteredEditModels.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </select>
             </div>
 
             {/* Source Image Upload */}

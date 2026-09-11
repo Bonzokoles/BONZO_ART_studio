@@ -7,9 +7,10 @@ import type {
   ImageParams,
   PollingStats,
   HistoryItem,
+  UploadedFile,
 } from '../types';
 import { getKey } from './keyStorage';
-import { generateProceduralArtwork } from './geminiService';
+import { generateProceduralArtwork, editImage, analyzeImage } from './geminiService';
 import { debugLogger } from './debugLogger';
 
 export const ASPECT_RATIO_DIMENSIONS: Record<
@@ -367,6 +368,28 @@ export const MODELS: ModelInfo[] = [
     category: 'image',
     costPerImage: 0.02,
     maxOutputs: 4,
+    supportsNegativePrompt: false,
+    supportsSeed: false,
+  },
+
+  // Edit-capable models (category: 'edit')
+  {
+    id: 'gemini-2.5-flash-image',
+    label: 'Nano Banana (Edit)',
+    provider: 'google',
+    category: 'edit',
+    costPerImage: 0.0,
+    maxOutputs: 1,
+    supportsNegativePrompt: false,
+    supportsSeed: false,
+  },
+  {
+    id: 'gemini-3-pro-image',
+    label: 'Nano Banana Pro (Edit)',
+    provider: 'google',
+    category: 'edit',
+    costPerImage: 0.04,
+    maxOutputs: 1,
     supportsNegativePrompt: false,
     supportsSeed: false,
   },
@@ -949,4 +972,27 @@ export const clearGenerationHistory = (): void => {
   } catch (err) {
     console.warn('Failed to clear history:', err);
   }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// IMAGE EDITING — MULTI-PROVIDER
+// ══════════════════════════════════════════════════════════════════════════════
+
+export interface ImageEditParams {
+  prompt: string;
+  image: UploadedFile;
+  provider: ProviderId;
+  model: string;
+}
+
+export const executeImageEdit = async (params: ImageEditParams): Promise<string> => {
+  const { prompt, image, provider, model } = params;
+
+  // Google path: delegate to existing editImage()
+  if (provider === 'google') {
+    return editImage(prompt, image);
+  }
+
+  // Non-google providers: not yet implemented
+  throw new Error(`Provider ${provider} image editing pipeline not yet implemented. Use Google Gemini for now.`);
 };

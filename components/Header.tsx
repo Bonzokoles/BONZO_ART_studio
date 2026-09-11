@@ -11,6 +11,7 @@ import {
   Terminal,
   Activity,
   BookOpen,
+  GitFork,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -60,6 +61,12 @@ const TABS: { id: string; name: FeatureTab; label: string; icon: React.ReactNode
     name: 'Timeline Studio',
     label: 'TIMELINE STUDIO',
     icon: <Film size={13} className="mr-1.5 shrink-0 text-[#ef4444]" />,
+  },
+  {
+    id: 'tab-workflows',
+    name: 'Workflows',
+    label: 'WORKFLOWS',
+    icon: <GitFork size={13} className="mr-1.5 shrink-0 text-[#38bdf8]" />,
   },
 ];
 

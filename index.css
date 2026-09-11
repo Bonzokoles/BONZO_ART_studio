@@ -117,3 +117,27 @@ code, pre, .font-mono, [data-mono] {
   pointer-events: none;
   z-index: 20;
 }
+
+/* Workflow editor ops-bar buttons */
+.btn-ops {
+  height: 28px;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  background: #181b22;
+  border: 1px solid #1f2937;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 0 !important;
+}
+.btn-ops:hover {
+  background: #1f232b;
+  color: #fff;
+  border-color: #374151;
+}
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { UploadedFile, ProgressStage, TelemetryLog, HistoryItem } from '../../types';
+import type { UploadedFile, ProgressStage, TelemetryLog, HistoryItem, AnalysisReport } from '../../types';
 import { ImageUpload } from '../../components/ImageUpload';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { ProgressIndicator } from '../../components/ProgressIndicator';
@@ -62,12 +62,22 @@ const getTimestamp = (): string => {
   return new Date().toTimeString().split(' ')[0];
 };
 
-interface ParsedAnalysis {
-  description?: string;
-  objects?: string[];
-  colors?: string[];
-  style?: string;
-  mood?: string;
+function validateAnalysisReport(raw: unknown): AnalysisReport | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const obj = raw as Record<string, unknown>;
+
+  const description = typeof obj.description === 'string' ? obj.description : '';
+  const objects = Array.isArray(obj.objects)
+    ? obj.objects.filter((x): x is string => typeof x === 'string')
+    : [];
+  const colors = Array.isArray(obj.colors)
+    ? obj.colors.filter((x): x is string => typeof x === 'string')
+    : [];
+  const style = typeof obj.style === 'string' ? obj.style : '';
+  const mood = typeof obj.mood === 'string' ? obj.mood : '';
+
+  if (!description) return null;
+  return { description, objects, colors, style, mood };
 }
 
 export const ImageAnalysisTab: React.FC = () => {
@@ -75,7 +85,7 @@ export const ImageAnalysisTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rawAnalysis, setRawAnalysis] = useState<string | null>(null);
-  const [parsedAnalysis, setParsedAnalysis] = useState<ParsedAnalysis | null>(null);
+  const [parsedAnalysis, setParsedAnalysis] = useState<AnalysisReport | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<'structured' | 'json'>('structured');
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -242,9 +252,17 @@ export const ImageAnalysisTab: React.FC = () => {
 
       try {
         const parsed = JSON.parse(resultText);
-        setParsedAnalysis(parsed);
+        const validated = validateAnalysisReport(parsed);
+        if (validated) {
+          setParsedAnalysis(validated);
+          setRawAnalysis(JSON.stringify(validated, null, 2));
+        } else {
+          setParsedAnalysis(null);
+          setRawAnalysis(resultText);
+        }
       } catch {
-        setParsedAnalysis({ description: resultText });
+        setParsedAnalysis(null);
+        setRawAnalysis(resultText);
       }
 
       addLog('OK', 'COMPLETED: Multimodal feature extraction verified');

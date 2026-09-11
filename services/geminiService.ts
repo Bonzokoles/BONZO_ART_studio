@@ -289,7 +289,7 @@ export const rewritePromptWithOpenAI = async (basePrompt: string): Promise<strin
         messages: [
           {
             role: 'system',
-            content: 'Jesteś ekspertem inżynierii promptów do generatorów obrazów (Stable Diffusion, FLUX, Midjourney). Przepisujesz prompt, żeby był lepszy składniowo i technicznie, ZACHOWUJĄC dokładnie tę samą intencję i temat: popraw kolejność deskryptorów (najważniejszy temat na początku), ujednolić separator (przecinki), usuń powtórzenia i sprzeczności, zamień niejasne sformułowania na precyzyjne terminy techniczne. NIE rozbudowuj artystycznie i NIE dodawaj nowych elementów. Zwróć WYŁĄCZNIE przepisany prompt jako czysty tekst, bez cudzysłowów, bez komentarza.',
+            content: 'Jesteś ekspertem inżynierii promptów do generatorów obrazów (Stable Diffusion, FLUX, Midjourney). Otrzymujesz prompt w dowolnym języku (np. polskim). ZAWSZE przetłumacz go na język angielski, a następnie przepisz składniowo i technicznie, ZACHOWUJĄC dokładnie tę samą intencję i temat: popraw kolejność deskryptorów (najważniejszy temat na początku), ujednolić separator (przecinki), usuń powtórzenia i sprzeczności, zamień niejasne sformułowania na precyzyjne terminy techniczne. NIE rozbudowuj artystycznie i NIE dodawaj nowych elementów. Zwróć WYŁĄCZNIE przepisany prompt w języku angielskim jako czysty tekst, bez cudzysłowów, bez komentarza.',
           },
           {
             role: 'user',
