@@ -6,6 +6,7 @@ import type {
   TelemetryLog,
   PollingStats,
   HistoryItem,
+  EditContext,
 } from '../../types';
 import {
   MODELS,
@@ -54,16 +55,21 @@ import {
   Maximize2,
   DollarSign,
   Bookmark,
+  Paintbrush,
 } from 'lucide-react';
 
-const PROVIDER_LIST: ProviderId[] = ['google', 'fal', 'replicate', 'openai'];
+const PROVIDER_LIST: ProviderId[] = ['google', 'fal', 'replicate', 'openai', 'pollinations'];
 const ASPECT_RATIOS: AspectRatio[] = ['1:1', '16:9', '9:16', '4:3', '3:4'];
 
 const getTimestamp = (): string => {
   return new Date().toTimeString().split(' ')[0];
 };
 
-export const ImageGenerationTab: React.FC = () => {
+interface ImageGenerationTabProps {
+  onSendToEdit?: (ctx: EditContext) => void;
+}
+
+export const ImageGenerationTab: React.FC<ImageGenerationTabProps> = ({ onSendToEdit }) => {
   // Primary Generation Parameters
   const [prompt, setPrompt] = useState<string>(() => {
     try { return localStorage.getItem('bonzo-studio-prompt') || ''; } catch { return ''; }
@@ -433,6 +439,17 @@ export const ImageGenerationTab: React.FC = () => {
     link.click();
   };
 
+  // Send generated image to Image Editing for inpainting/refinement
+  const handleSendToEdit = () => {
+    if (!activeImage || !onSendToEdit) return;
+    onSendToEdit({
+      image: activeImage,
+      prompt: prompt,
+      provider: lastGenInfo?.provider || provider,
+      model: lastGenInfo?.modelLabel || model,
+    });
+  };
+
   // Copy Image Data
   const handleCopyData = (imgUrl: string) => {
     navigator.clipboard.writeText(imgUrl);
@@ -490,11 +507,15 @@ export const ImageGenerationTab: React.FC = () => {
                       }}
                     >
                       <span className="truncate">{PROVIDER_LABELS[p]}</span>
-                      {!isConfigured && p !== 'local' && (
+                      {p === 'pollinations' ? (
+                        <span className="text-[8px] text-[#14b8a6] font-normal shrink-0 ml-1">
+                          [FREE]
+                        </span>
+                      ) : !isConfigured && p !== 'local' ? (
                         <span className="text-[8px] text-[#ef4444] font-normal shrink-0 ml-1">
                           [NO KEY]
                         </span>
-                      )}
+                      ) : null}
                     </button>
                   );
                 })}
@@ -877,6 +898,17 @@ export const ImageGenerationTab: React.FC = () => {
               >
                 <Maximize2 size={11} />
                 <span>INSPECT</span>
+              </button>
+
+              <button
+                id="canvas-send-to-edit-btn"
+                type="button"
+                onClick={handleSendToEdit}
+                className="px-2.5 py-1 bg-[#181b22] hover:bg-[#1f232b] text-[#38bdf8] border border-[#38bdf8]/60 hover:border-[#38bdf8] text-[10px] uppercase font-bold flex items-center space-x-1"
+                title="Send this image to Image Editing to refine/inpaint"
+              >
+                <Paintbrush size={11} />
+                <span>EDIT</span>
               </button>
 
               <button

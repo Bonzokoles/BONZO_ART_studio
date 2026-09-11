@@ -1,4 +1,4 @@
-export type ProviderId = 'fal' | 'replicate' | 'google' | 'openai' | 'local';
+export type ProviderId = 'fal' | 'replicate' | 'google' | 'openai' | 'local' | 'pollinations';
 
 export type FeatureTab =
   | 'Image Generation'
@@ -182,6 +182,13 @@ export interface PollingStats {
 export interface VeoOperationContext {
   operation: any;
   prompt: string;
+}
+
+export interface EditContext {
+  image: string;
+  prompt: string;
+  provider: ProviderId;
+  model: string;
 }
 
 export interface LoraTrainingConfig {

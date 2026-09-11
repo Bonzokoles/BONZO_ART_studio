@@ -393,6 +393,38 @@ export const MODELS: ModelInfo[] = [
     supportsNegativePrompt: false,
     supportsSeed: false,
   },
+
+  // Pollinations (free, no key, URL-based)
+  {
+    id: 'flux',
+    label: 'FLUX (Free)',
+    provider: 'pollinations',
+    category: 'image',
+    costPerImage: 0,
+    maxOutputs: 1,
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'turbo',
+    label: 'Flux Turbo (Free)',
+    provider: 'pollinations',
+    category: 'image',
+    costPerImage: 0,
+    maxOutputs: 1,
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
+  {
+    id: 'seedream',
+    label: 'Seedream (Free)',
+    provider: 'pollinations',
+    category: 'image',
+    costPerImage: 0,
+    maxOutputs: 1,
+    supportsNegativePrompt: false,
+    supportsSeed: true,
+  },
 ];
 
 export interface MultiGenerationResult {
@@ -920,6 +952,51 @@ export const executeMultiProviderGeneration = async (
     } else {
       debugLogger.logWarning('openai', `No OPENAI_API_KEY found; fallback to procedural preview`);
       throw new Error("API_KEY_MISSING: Brak klucza OPENAI_API_KEY w ustawieniach lub pliku .env.local.");
+    }
+  }
+
+  // --- POLLINATIONS PROVIDER (free, no key, URL-based) ---
+  if (provider === 'pollinations') {
+    const callStart = Date.now();
+    try {
+      emitProgress(35, 'POLLINATIONS_DISPATCH', `Calling Pollinations free gateway [${model}]...`);
+      const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      // Route through Vite proxy on localhost to bypass Cloudflare Turnstile (browser-origin challenge).
+      const base = isLocalhost ? '/api-pollinations' : 'https://image.pollinations.ai';
+      const url = `${base}/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true`;
+      debugLogger.logRequest('pollinations', url, 'GET', { prompt, width, height, model, seed }, `[POLLINATIONS] GET image (${width}x${height}, model: ${model})`);
+
+      const res = await fetch(url, { signal: options?.signal });
+      const duration = Date.now() - callStart;
+
+      if (!res.ok) {
+        throw new Error(`[POLLINATIONS ERROR ${res.status}] ${res.statusText || 'Błąd bramki Pollinations.'}`);
+      }
+
+      const blob = await res.blob();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      debugLogger.logResponse('pollinations', url, res.status, duration, { bytes: blob.size }, '[POLLINATIONS] Image returned (free)');
+      emitProgress(100, 'COMPLETED', `Pollinations delivered image (${Math.round(blob.size / 1024)} KB, free)`);
+      return {
+        images: [base64],
+        provider,
+        model,
+        cost: 0,
+        width,
+        height,
+        seed,
+        generationTimeMs: Date.now() - startTime,
+      };
+    } catch (err: any) {
+      console.warn('Pollinations error:', err);
+      debugLogger.logError('pollinations', model, err, Date.now() - callStart, { prompt, width, height, model });
+      throw err;
     }
   }
 

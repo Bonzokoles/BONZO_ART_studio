@@ -1,5 +1,5 @@
 export type LogType = 'REQ' | 'RES' | 'ERR' | 'INFO' | 'WARN';
-export type ProviderId = 'google' | 'fal' | 'replicate' | 'openai' | 'system' | 'veo';
+export type ProviderId = 'google' | 'fal' | 'replicate' | 'openai' | 'system' | 'veo' | 'pollinations';
 
 export interface LogEntry {
   id: string;

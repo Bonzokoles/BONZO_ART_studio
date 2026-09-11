@@ -8,6 +8,7 @@ export const PROVIDER_KEY_MAP: Record<ProviderId, string> = {
   replicate: 'REPLICATE_API_TOKEN',
   openai: 'OPENAI_API_KEY',
   local: 'LOCAL_SD_URL',
+  pollinations: '', // no key required — free, URL-based
 };
 
 export const PROVIDER_LABELS: Record<ProviderId, string> = {
@@ -16,6 +17,7 @@ export const PROVIDER_LABELS: Record<ProviderId, string> = {
   replicate: 'Replicate',
   openai: 'OpenAI',
   local: 'Local SD',
+  pollinations: 'Pollinations',
 };
 
 export const PROVIDER_COLORS: Record<ProviderId, string> = {
@@ -24,6 +26,7 @@ export const PROVIDER_COLORS: Record<ProviderId, string> = {
   replicate: '#0066ff',
   openai: '#10a37f',
   local: '#6b7280',
+  pollinations: '#14b8a6',
 };
 
 export const getKey = (keyName: string): string => {

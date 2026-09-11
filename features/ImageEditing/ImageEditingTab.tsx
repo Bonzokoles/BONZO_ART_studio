@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { UploadedFile, ProgressStage, TelemetryLog, HistoryItem, ProviderId } from '../../types';
+import type { UploadedFile, ProgressStage, TelemetryLog, HistoryItem, ProviderId, EditContext } from '../../types';
 import { ImageUpload } from '../../components/ImageUpload';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { ProgressIndicator } from '../../components/ProgressIndicator';
@@ -70,7 +70,12 @@ const getTimestamp = (): string => {
   return new Date().toTimeString().split(' ')[0];
 };
 
-export const ImageEditingTab: React.FC = () => {
+interface ImageEditingTabProps {
+  editContext?: EditContext | null;
+  onConsumeEditContext?: () => void;
+}
+
+export const ImageEditingTab: React.FC<ImageEditingTabProps> = ({ editContext, onConsumeEditContext }) => {
   const [prompt, setPrompt] = useState('');
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,6 +125,23 @@ export const ImageEditingTab: React.FC = () => {
       window.removeEventListener('bonzo-history-updated', handleUpdate);
     };
   }, []);
+
+  // Consume an image passed from Image Generation ("SEND TO EDIT") — load it as
+  // the source file so the user continues the process without re-uploading.
+  useEffect(() => {
+    if (!editContext) return;
+    setUploadedFile({
+      name: `generated-${Date.now()}.png`,
+      size: 500000,
+      mimeType: 'image/png',
+      preview: editContext.image,
+      base64: editContext.image.replace(/^data:image\/\w+;base64,/, ''),
+    });
+    setEditedImageUrl(null);
+    // Pre-fill the edit prompt with a light directive derived from the source prompt
+    setPrompt(`Refine this image: ${editContext.prompt}`);
+    onConsumeEditContext?.();
+  }, [editContext, onConsumeEditContext]);
 
   const addLog = (level: TelemetryLog['level'], message: string) => {
     setTelemetryLogs((prev) => [

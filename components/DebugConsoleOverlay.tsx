@@ -184,6 +184,7 @@ export const DebugConsoleOverlay: React.FC<DebugConsoleOverlayProps> = ({
       replicate: { text: '#a855f7', bg: '#7e22ce/10', border: '#9333ea/30' },
       openai: { text: '#10b981', bg: '#065f46/10', border: '#059669/30' },
       veo: { text: '#f59e0b', bg: '#b45309/10', border: '#d97706/30' },
+      pollinations: { text: '#14b8a6', bg: '#0f766e/10', border: '#0d9488/30' },
       system: { text: '#9ca3af', bg: '#374151/10', border: '#4b5563/30' },
     };
     const c = colors[provider] || colors.system;

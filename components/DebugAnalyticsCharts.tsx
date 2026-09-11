@@ -73,6 +73,12 @@ const PROVIDER_CONFIG: Record<
     bg: 'rgba(180, 83, 9, 0.15)',
     border: 'rgba(245, 158, 11, 0.4)',
   },
+  pollinations: {
+    label: 'Pollinations (Free)',
+    color: '#14b8a6',
+    bg: 'rgba(13, 148, 136, 0.15)',
+    border: 'rgba(20, 184, 166, 0.4)',
+  },
   system: {
     label: 'Procedural/Internal',
     color: '#d4a574',
@@ -87,6 +93,7 @@ const ALL_PROVIDERS: ProviderId[] = [
   'replicate',
   'openai',
   'veo',
+  'pollinations',
   'system',
 ];
 

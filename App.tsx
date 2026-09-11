@@ -15,12 +15,13 @@ import {
 } from './data/artistsData';
 import { findArtistById } from './data/allArtists';
 import { debugLogger, type LogEntry } from './services/debugLogger';
-import type { FeatureTab, VeoOperationContext } from './types';
+import type { FeatureTab, VeoOperationContext, EditContext } from './types';
 import { Activity, Sparkles, Terminal, ChevronUp, ChevronDown, AlertCircle, RefreshCw } from 'lucide-react';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FeatureTab>('Image Generation');
   const [veoContext, setVeoContext] = useState<VeoOperationContext | null>(null);
+  const [editContext, setEditContext] = useState<EditContext | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDebugOpen, setIsDebugOpen] = useState<boolean>(false);
   const [logCount, setLogCount] = useState<number>(0);
@@ -119,9 +120,9 @@ const App: React.FC = () => {
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'Image Generation':
-        return <ImageGenerationTab />;
+        return <ImageGenerationTab onSendToEdit={(ctx) => { setEditContext(ctx); setActiveTab('Image Editing'); }} />;
       case 'Image Editing':
-        return <ImageEditingTab />;
+        return <ImageEditingTab editContext={editContext} onConsumeEditContext={() => setEditContext(null)} />;
       case 'Image Analysis':
         return <ImageAnalysisTab />;
       case 'Video Generation':
