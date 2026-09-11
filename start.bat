@@ -1,9 +1,10 @@
 @echo off
 cd /d "Q:\BONZO_creative_ai_studio"
 echo.
-echo   BONZO AI ART DEVZ // CREATIVE AI STUDIO v2.6
+echo   BONZO AI ART DEVZ // CREATIVE AI STUDIO v2.7
 echo   --------------------------------------------------
-echo   Providers: Google / fal.ai / Replicate / OpenAI
+echo   Providers: Google / fal.ai / Replicate / OpenAI / Pollinations (FREE)
+echo   Features: Image Gen / Editing / Analysis / Video / Workflows / Timeline
 echo.
 echo   Starting on http://localhost:5853
 echo   Press Ctrl+C to stop
